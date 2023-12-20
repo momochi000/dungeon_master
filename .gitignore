@@ -1,0 +1,8 @@
+# neo4j docker container data volume 
+neo4j
+
+# don't pass along any env vars for now
+.env
+
+# don't share the nrepl port, this will be unique on each run
+.nrepl-port
