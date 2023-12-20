@@ -5,9 +5,10 @@
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [
                  [org.clojure/clojure "1.11.1"]
+                 [org.neo4j.driver/neo4j-java-driver "5.15.0"]
+                 [net.clojars.wkok/openai-clojure "0.14.0"]
                  ;;[clj-http "2.0.0"] ; just to test adding deps
-                 [clojurewerkz/neocons "3.2.0"]
-                 [net.clojars.wkok/openai-clojure "0.14.0"] ]
+                 ]
   :main ^:skip-aot dungeon-master.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all

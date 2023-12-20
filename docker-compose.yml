@@ -11,8 +11,8 @@ services:
       - "61799:61799"
     tty: true
     stdin_open: true
-    #depends_on:
-    #  - "db"
+    depends_on:
+      - "graphdb"
 
   graphdb:
     image: docker.io/neo4j
