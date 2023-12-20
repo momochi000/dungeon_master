@@ -1,0 +1,25 @@
+version: '3'
+services:
+  dungeon:
+    build:
+      context: .
+    volumes:
+      - ./dungeon_master:/app/
+    environment:
+      - OPENAI_API_KEY=$OPENAI_API_KEY
+    ports:
+      - "61799:61799"
+    tty: true
+    stdin_open: true
+    #depends_on:
+    #  - "db"
+
+  graphdb:
+    image: docker.io/neo4j
+    volumes:
+       - ./neo4j/data:/data
+    environment:
+      - NEO4J_AUTH=none
+    ports:
+      - "7474:7474"
+      - "7687:7687"
