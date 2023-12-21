@@ -6,3 +6,6 @@ neo4j
 
 # don't share the nrepl port, this will be unique on each run
 .nrepl-port
+
+# folder for temporary junk used during development
+dev
