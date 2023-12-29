@@ -1,0 +1,32 @@
+#+title: Project
+
+* Tasks
+** TODO create structure for game state
+seems like defrecord is the way to do this
+*** DONE create the file with the defrecord statement
+CLOSED: [2023-12-29 Fri 15:08]
+
+#+begin_example
+dungeon-master.core=> (require '[dungeon-master.game-state :as game-state])
+nil
+
+dungeon-master.core=> (ns-aliases *ns*)
+{game-state #object[clojure.lang.Namespace 0x2ee63961 "dungeon-master.game-state"]}
+dungeon-master.core=> (ns-publics 'dungeon-master.game-state)
+{->GameState #'dungeon-master.game-state/->GameState, map->GameState #'dungeon-master.game-state/map->GameState}
+dungeon-master.core=> (def gs (game-state/->GameState "foo" "bar"))
+#'dungeon-master.core/gs
+#+end_example
+
+*** TODO create some way to push some data fixture into neo4j
+some strawman graph, based on the dnd convo i had with gpt and the entities
+extracted.
+*** TODO query out the graph from neo4j
+*** TODO turn the results from neo4j query into some nested map structure
+this is step 1 in an experiment. i don't know if this is the best representation
+of the graph to place in memory but the intent is to get closer to finding out.
+
+alternatively i'd turn it into clojure's loom or ubergraph
+
+perhaps the best way to represent the graph is simply a graphviz dot text format?
+** TODO story: user can submit input which results in LLM response

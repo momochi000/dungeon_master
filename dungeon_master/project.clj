@@ -1,5 +1,5 @@
 (defproject dungeon_master "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
+  :description "An experimental attempt to create a LLM-powered dungeon master who can run a paper and pencil tabletop role playing campaign"
   :url "http://example.com/FIXME"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
             :url "https://www.eclipse.org/legal/epl-2.0/"}
@@ -10,6 +10,7 @@
                  ;;[clj-http "2.0.0"] ; just to test adding deps
                  ]
   :main ^:skip-aot dungeon-master.core
+  :source-paths ["src"]
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all
                        :jvm-opts ["-Dclojure.compiler.direct-linking=true"]}})
