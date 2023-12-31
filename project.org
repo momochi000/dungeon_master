@@ -21,6 +21,12 @@ dungeon-master.core=> (def gs (game-state/->GameState "foo" "bar"))
 *** TODO create some way to push some data fixture into neo4j
 some strawman graph, based on the dnd convo i had with gpt and the entities
 extracted.
++ [X] function(ality) to create a person node in neo4j
++ [X] take the json emitted by gpt and parse it into clojure
++ [ ] loop over the entities, and create nodes for each
+  if they don't exist
++ [ ] loop over relationships, and connect entities
+  if they aren't already connected
 *** TODO query out the graph from neo4j
 *** TODO turn the results from neo4j query into some nested map structure
 this is step 1 in an experiment. i don't know if this is the best representation
@@ -30,3 +36,24 @@ alternatively i'd turn it into clojure's loom or ubergraph
 
 perhaps the best way to represent the graph is simply a graphviz dot text format?
 ** TODO story: user can submit input which results in LLM response
+* Notes
+** neo4j
+*** databases
+neo4j begins with 2 databases:
++ system
+  the system database described above, containing meta-data on the DBMS and security configuration.
+
++ neo4j
+  the default database, named using the config option dbms.default_database=neo4j.
+*** workings
+**** an updating query always either fully succeeds or does not succeed at all.
+**** transactions
++--------------------------------------------------+-------------------------------------------------------------------+
+| Explicit                                         | Implicit                                                           |
++--------------------------------------------------+-------------------------------------------------------------------+
+| Opened by the user.                              | Opened automatically.                                              |
++--------------------------------------------------+--------------------------------------------------------------------+
+| Can execute multiple Cypher queries in sequence. | Can execute a single Cypher query.                                 |
++--------------------------------------------------+-------------------------------------------------------------------+
+| Committed, or rolled back, by the user.          | Committed automatically when a transactions finishes successfully. |
++--------------------------------------------------+-------------------------------------------------------------------+
