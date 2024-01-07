@@ -1,6 +1,7 @@
 (ns dungeon-master.fixtures.test-world-state
   (:import [org.neo4j.driver GraphDatabase]
            [org.neo4j.driver AuthTokens]
+           [org.neo4j.driver Values]
            ;;[org.neo4j.driver Values parameters]
            [org.neo4j.driver TransactionWork])
   (:require [cheshire.core :as json]))
@@ -15,8 +16,8 @@
         {\"label\":\"Place\",\"id\":\"baldursGate\",\"name\":\"Baldur's Gate\",\"description\":\"The city where the Blushing Mermaid Tavern is located and where business is always good according to Coran\"}
     ],
     \"relationships\": [
-        \"coran|AT|blushingMermaidTavern\",
-        \"lordDhelt|AT|blushingMermaidTavern\",
+        \"coran|IN|blushingMermaidTavern\",
+        \"lordDhelt|IN|blushingMermaidTavern\",
         \"blushingMermaidTavern|IN|baldursGate\"
     ]
 }")
@@ -32,8 +33,8 @@
 ;;CREATE (blushingMermaidTavern:Place {name:'Blushing Mermaid Tavern', description:'The tavern in Baldur's Gate known for a warm atmosphere and busy clientele'})
 ;;CREATE (baldursGate:Place {name:'Baldur\'s Gate', description:'The city where the Blushing Mermaid Tavern is located and where business is always good according to Coran'})
 ;;CREATE
-;;  (coran)-[:AT]->(blushingMermaidTavern),
-;;  (lordDhelt)-[:AT]->(blushingMermaidTavern),
+;;  (coran)-[:IN]->(blushingMermaidTavern),
+;;  (lordDhelt)-[:IN]->(blushingMermaidTavern),
 ;;  (blushingMermaidTavern)-[:IN]->(baldursGate)
 
 
@@ -42,35 +43,67 @@
   "insert some fixed data into the graph db"
   []
   (with-open [driver (GraphDatabase/driver "bolt://graphdb:7687" (AuthTokens/none))]
+  ;;(with-open [driver (GraphDatabase/driver "bolt://localhost:7687" (AuthTokens/none))]
       (with-open [session (.session driver)]
-        (let [result (.run session "CREATE (n) RETURN n")]
-      (println (.single result))))))
+        (let [world-data (json/parse-string fixture-json-string)]
+          ( let [entities (world-data "entities")]
 
+            (doall (map
+              (fn [entity-data] (create-node entity-data session))
+              entities)))))))
+
+(insert-test-world-state)
+
+(defn create-node
+  [node-data driver-session]
+  (case (node-data "label")
+    "Place" (create-place-node node-data driver-session)
+    "Person" (create-person-node node-data driver-session)
+    )
+  )
 
 (defn create-person-node
   "create a person node"
-  [node-data session-driver]
+  [node-data driver-session]
+
+  (let [cypher-string "MERGE (p:Person {id: $id, name: $name, description: $description}) RETURN (p)"]
+    (run-cypher-stmt-with-data cypher-string node-data driver-session)))
+
+(defn create-place-node
+  "create a place node"
+  [node-data driver-session]
+
+  ;;(println "DEBUG: called create-place-node")
+  (let [cypher-string "MERGE (p:Place {id: $id, name: $name, description: $description}) RETURN (p)"]
+    (run-cypher-stmt-with-data cypher-string node-data driver-session)))
+
+
+(defn run-cypher-stmt-with-data
+  "Run a MERGE statement along with data to fill cypher placeholders"
+  [cypher-statement node-data driver-session]
+
   (.writeTransaction
-    session-driver
+    driver-session
     (reify TransactionWork (execute [this tx]
                              (let [result
                                    (.run tx
-                                         "MERGE (p:Person {name: $name, description: $description}) RETURN (p)"
+                                         cypher-statement
                                          node-data)]
-                               (.single result))))))
+                               (.single result)
+                               )))))
 
 ;; next steps
-;; TODO: now put the above together:
-;;      parse the json string
-;;      loop over entities
-;;      for each entity, call the right function: create person node or create place node
-;;        need to figure out how to do that cleanly in clojure
-;;        it looks like maybe cond-> is able to do it?
-;; TODO: , create the relationships as defined in the input json
+;; TODO: create the relationships as defined in the input json
 
 
 
 ;; testing this out
+
+;; Run these in repl or editor to have access to the imports needed in this namespace
+;;(import '(org.neo4j.driver TransactionWork))
+;;(import '(org.neo4j.driver GraphDatabase))
+;;(import '(org.neo4j.driver AuthTokens))
+;;(require '[cheshire.core :as json])
 
 ;; From within the compose cluster, use graphdb as the hostname of the neo4j instance
 ;; but running in my repl, i can access it as localhost
@@ -83,9 +116,6 @@
 ;;      (query-func data session))))
 
 
-;;(import '(org.neo4j.driver TransactionWork))
-;;(import '(org.neo4j.driver GraphDatabase))
-;;(import '(org.neo4j.driver AuthTokens))
 ;;
 ;;
 ;;(def sample-person
@@ -105,3 +135,37 @@
 ;; parse the fixture json into a clojure map
 ;; the true here says make the keys into symbols. we might not want this though.
 ;; (json/parse-string fixture-json-string true)
+
+
+;;(def people
+;;  '(
+;;    {:name "john" :description "a person"}
+;;    {:name "tony" :description "a person"}
+;;    {:name "amy" :description "a person"}
+;;    ))
+;;
+;;
+;;(defn create-node
+;;  [node-data driver-session]
+;;  (.writeTransaction
+;;    driver-session
+;;    (reify TransactionWork (execute [this tx]
+;;                             (let [result
+;;                                   (.run tx
+;;                                         "MERGE (p:Person {name: $name, description: $description}) RETURN (p)"
+;;                                         node-data)]
+;;                               (.single result)
+;;                               )))))
+;;
+;;(defn test-insert-records
+;;  "insert some fixed data into the graph db"
+;;  []
+;;  (with-open [driver (GraphDatabase/driver "bolt://localhost:7687" (AuthTokens/none))]
+;;    (with-open [session (.session driver)]
+;;      (create-node (first people) session))))
+;;
+;;      ;;(map
+;;      ;;  (fn [entity-data] (create-node entity-data session))
+;;      ;;  people))))
+;;
+;;(test-insert-records)
