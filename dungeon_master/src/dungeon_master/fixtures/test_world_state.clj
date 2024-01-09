@@ -150,7 +150,6 @@
 ;;(import '(org.neo4j.driver Values))
 ;;(require '[cheshire.core :as json])
 
-
 ;;(insert-test-world-state)
 
 ;;(defn test-create-relationship

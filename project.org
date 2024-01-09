@@ -1,7 +1,8 @@
 #+title: Project
 
 * Tasks
-** TODO create structure for game state
+** DONE create structure for game state
+CLOSED: [2024-01-08 Mon 13:36]
 seems like defrecord is the way to do this
 *** DONE create the file with the defrecord statement
 CLOSED: [2023-12-29 Fri 15:08]
@@ -18,24 +19,34 @@ dungeon-master.core=> (def gs (game-state/->GameState "foo" "bar"))
 #'dungeon-master.core/gs
 #+end_example
 
-*** TODO create some way to push some data fixture into neo4j
+*** DONE create some way to push some data fixture into neo4j
+CLOSED: [2024-01-08 Mon 12:37]
 some strawman graph, based on the dnd convo i had with gpt and the entities
 extracted.
 + [X] function(ality) to create a person node in neo4j
 + [X] take the json emitted by gpt and parse it into clojure
-+ [ ] loop over the entities, and create nodes for each
++ [X] loop over the entities, and create nodes for each
   if they don't exist
-+ [ ] loop over relationships, and connect entities
++ [X] loop over relationships, and connect entities
   if they aren't already connected
-*** TODO query out the graph from neo4j
-*** TODO turn the results from neo4j query into some nested map structure
+** DONE create method to call gpt with some prompt on top of the user action
+CLOSED: [2024-01-08 Mon 19:48]
+** TODO query out the graph from neo4j
+** TODO turn the results from neo4j query into some nested map structure
 this is step 1 in an experiment. i don't know if this is the best representation
 of the graph to place in memory but the intent is to get closer to finding out.
 
 alternatively i'd turn it into clojure's loom or ubergraph
 
 perhaps the best way to represent the graph is simply a graphviz dot text format?
-** TODO story: user can submit input which results in LLM response
+
+I believe GPT is smart enough to read that and understand the structure without
+having to do anything fancy with turning a deeply nested map into a prompt
+somehow
+** TODO User input is converted into some request for data from the database
+user input -> extract entities -> cypher query?
+or user input -> vector search?
+or both..?
 * Notes
 ** neo4j
 *** databases
