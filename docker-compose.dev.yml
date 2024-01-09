@@ -11,8 +11,9 @@ services:
       - "61799:61799"
     tty: true
     stdin_open: true
-    #depends_on:
-    #  - "db"
+    depends_on:
+      - "graphdb"
+    command: "lein repl :start :host 0.0.0.0 :port 61799"
 
   graphdb:
     image: docker.io/neo4j
