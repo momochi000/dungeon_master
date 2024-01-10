@@ -31,7 +31,21 @@ extracted.
   if they aren't already connected
 ** DONE create method to call gpt with some prompt on top of the user action
 CLOSED: [2024-01-08 Mon 19:48]
-** TODO query out the graph from neo4j
+** DONE create prompt to extract entities etc from gpt response
+CLOSED: [2024-01-09 Tue 11:05]
+** TODO update the graph according to entities and relationships in json
+from gpt's response to extract entities
+
+MERGE alone is not sufficient to prevent re-insertion of entities.
+I need to match on id and if there is no record, then re-insert
+if there is a record, i need to do something smart about the description
+
+I also shouldn't use ~id~ as a unique field, id is already a property of all nodes
+I'll want to come up with something else and add a unique constraint like
+~CREATE CONSTRAINT ON (p:Person) ASSERT p.my_field IS UNIQUE~
+** TODO continue fleshing out fixture, use game chat from gpt
+** TODO create initial character sheet data structure
+and insert it into the game state somewhere
 ** TODO turn the results from neo4j query into some nested map structure
 this is step 1 in an experiment. i don't know if this is the best representation
 of the graph to place in memory but the intent is to get closer to finding out.
@@ -43,6 +57,8 @@ perhaps the best way to represent the graph is simply a graphviz dot text format
 I believe GPT is smart enough to read that and understand the structure without
 having to do anything fancy with turning a deeply nested map into a prompt
 somehow
+** TODO Create some way to handle database setup
+e.g. create constraints and indices
 ** TODO User input is converted into some request for data from the database
 user input -> extract entities -> cypher query?
 or user input -> vector search?
