@@ -5,6 +5,21 @@
            [org.neo4j.driver TransactionWork])
   (:require [cheshire.core :as json]))
 
+;; These are the statements we want to run.
+;;-- CREATE CONSTRAINT IF NOT EXISTS FOR (p:Person) REQUIRE (p.name) IS UNIQUE;
+;;CREATE INDEX IF NOT EXISTS FOR (p:Person) ON (p.name);
+;;-- CREATE CONSTRAINT IF NOT EXISTS FOR (p:Place) REQUIRE (p.name) IS UNIQUE;
+;;CREATE INDEX IF NOT EXISTS FOR (p:Place) ON (p.name);
+
+;;CREATE (coran:Person {name:'Coran', description:'The stout bartender with a ruddy face who works at the Blushing Mermaid Tavern in Baldur's Gate'})
+;;CREATE (lordDhelt:Person {name:'Lord Dhelt', description:'A nobleman from Amn who is currently in the Blushing Mermaid Tavern and in need of discreet help'})
+;;CREATE (blushingMermaidTavern:Place {name:'Blushing Mermaid Tavern', description:'The tavern in Baldur's Gate known for a warm atmosphere and busy clientele'})
+;;CREATE (baldursGate:Place {name:'Baldur\'s Gate', description:'The city where the Blushing Mermaid Tavern is located and where business is always good according to Coran'})
+;;CREATE
+;;  (coran)-[:IN]->(blushingMermaidTavern),
+;;  (lordDhelt)-[:IN]->(blushingMermaidTavern),
+;;  (blushingMermaidTavern)-[:IN]->(baldursGate)
+
 
 (def fixture-json-string
 "{
@@ -20,21 +35,6 @@
         \"blushingMermaidTavern|IN|baldursGate\"
     ]
 }")
-
-;; These are the statements we want to run.
-;;-- CREATE CONSTRAINT IF NOT EXISTS FOR (p:Person) REQUIRE (p.name) IS UNIQUE;
-;;CREATE INDEX IF NOT EXISTS FOR (p:Person) ON (p.name);
-;;-- CREATE CONSTRAINT IF NOT EXISTS FOR (p:Place) REQUIRE (p.name) IS UNIQUE;
-;;CREATE INDEX IF NOT EXISTS FOR (p:Place) ON (p.name);
-
-;;CREATE (coran:Person {name:'Coran', description:'The stout bartender with a ruddy face who works at the Blushing Mermaid Tavern in Baldur's Gate'})
-;;CREATE (lordDhelt:Person {name:'Lord Dhelt', description:'A nobleman from Amn who is currently in the Blushing Mermaid Tavern and in need of discreet help'})
-;;CREATE (blushingMermaidTavern:Place {name:'Blushing Mermaid Tavern', description:'The tavern in Baldur's Gate known for a warm atmosphere and busy clientele'})
-;;CREATE (baldursGate:Place {name:'Baldur\'s Gate', description:'The city where the Blushing Mermaid Tavern is located and where business is always good according to Coran'})
-;;CREATE
-;;  (coran)-[:IN]->(blushingMermaidTavern),
-;;  (lordDhelt)-[:IN]->(blushingMermaidTavern),
-;;  (blushingMermaidTavern)-[:IN]->(baldursGate)
 
 
 ;; TODO: update this to take in or read the config for the graph database
@@ -68,7 +68,7 @@
   "create a person node"
   [node-data driver-session]
 
-  (let [cypher-string "MERGE (p:Person {id: $id, name: $name, description: $description}) RETURN (p)"]
+  (let [cypher-string "MERGE (p:Person {name_id: $id}) ON CREATE SET p.name = $name, p.description = $description RETURN (p)"]
     (run-cypher-stmt-with-data cypher-string node-data driver-session)))
 
 (defn create-place-node
@@ -76,7 +76,7 @@
   [node-data driver-session]
 
   ;;(println "DEBUG: called create-place-node")
-  (let [cypher-string "MERGE (p:Place {id: $id, name: $name, description: $description}) RETURN (p)" ]
+  (let [cypher-string "MERGE (p:Place {name_id: $id, name: $name, description: $description}) RETURN (p)" ]
         ;;parameters (Values/parameters
         ;;             ;;(into {} (map (fn [[k v]] [(name k) v]) node-data))
         ;;             "id" ("id" node-data)
@@ -95,9 +95,9 @@
   "relate two nodes with each other"
   [first-node-id relationship-type second-node-id]
   (let [cypher-stmt (case relationship-type
-                      "IN" "MATCH (n1) WHERE n1.id = $start_node_id
-                           MATCH (n2) WHERE n2.id = $end_node_id
-                           CREATE (n1)-[:IN]->(n2)")
+                      "IN" "MATCH (n1) WHERE n1.name_id = $start_node_id
+                           MATCH (n2) WHERE n2.name_id = $end_node_id
+                           MERGE (n1)-[:IN]->(n2)")
         cypher-params {"start_node_id" first-node-id "end_node_id" second-node-id} ]
     [cypher-stmt cypher-params]))
 
@@ -133,15 +133,15 @@
                                    (.run tx
                                          cypher-statement
                                          node-data)])))))
-;; next steps
+
 ;; TODO: use Values/parameters rather than just clojure maps to pass the args
   ;; couldn't get this to work. complains of 6 params being passed to Values.parameters
   ;; other means of calling `parameters` seemed to complain of things relating
   ;; to clojure data types not matching up with java datatypes
 
 
-;; testing this out
 
+;; testing this out
 
 ;; Run these in repl or editor to have access to the imports needed in this namespace
 ;;(import '(org.neo4j.driver TransactionWork))
