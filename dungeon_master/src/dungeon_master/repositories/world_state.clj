@@ -5,14 +5,13 @@
            [org.neo4j.driver TransactionWork])
   (:require [cheshire.core :as json]))
 
-
 (defn update-db-world-state
   "Given a map of entities and relationships, make appropriate insert or update
   statements into the graph db. Due to the interop with neo4j, the map expects
   keys as strings."
   [entities-map]
   (with-open [driver (GraphDatabase/driver "bolt://graphdb:7687" (AuthTokens/none))]
-    ;;(with-open [driver (GraphDatabase/driver "bolt://localhost:7687" (AuthTokens/none))]
+  ;;(with-open [driver (GraphDatabase/driver "bolt://localhost:7687" (AuthTokens/none))]
     (with-open [session (.session driver)]
       (let [entities (entities-map "entities")
             relationships (entities-map "relationships") ]
@@ -28,8 +27,6 @@
                  relationships))))))
 
 
-
-
 (defn create-node
   [node-data driver-session]
   (case (node-data "label")
@@ -39,16 +36,13 @@
 (defn create-person-node
   "create a person node"
   [node-data driver-session]
-
   (let [cypher-string "MERGE (p:Person {name_id: $id}) ON CREATE SET p.name = $name, p.description = $description RETURN (p)"]
     (run-cypher-stmt-with-data cypher-string node-data driver-session)))
 
 (defn create-place-node
   "create a place node"
   [node-data driver-session]
-
-  ;;(println "DEBUG: called create-place-node")
-  (let [cypher-string "MERGE (p:Place {name_id: $id, name: $name, description: $description}) RETURN (p)" ]
+  (let [cypher-string "MERGE (p:Place {name_id: $id}) ON CREATE SET p.name = $name, p.description = $description RETURN (p)" ]
         ;;parameters (Values/parameters
         ;;             ;;(into {} (map (fn [[k v]] [(name k) v]) node-data))
         ;;             "id" ("id" node-data)
@@ -69,7 +63,10 @@
   (let [cypher-stmt (case relationship-type
                       "IN" "MATCH (n1) WHERE n1.name_id = $start_node_id
                            MATCH (n2) WHERE n2.name_id = $end_node_id
-                           MERGE (n1)-[:IN]->(n2)")
+                           MERGE (n1)-[:IN]->(n2)"
+                      "KNOWS" "MATCH (n1) WHERE n1.name_id = $start_node_id
+                              MATCH (n2) WHERE n2.name_id = $end_node_id
+                              MERGE (n1)-[:IN]->(n2)")
         cypher-params {"start_node_id" first-node-id "end_node_id" second-node-id} ]
     [cypher-stmt cypher-params]))
 
@@ -84,7 +81,6 @@
 (defn run-cypher-stmt-with-data
   "Run a cypher statement along with data to fill cypher placeholders"
   [cypher-statement node-data driver-session]
-
   (.writeTransaction
     driver-session
     (reify TransactionWork (execute [this tx]
@@ -97,7 +93,6 @@
 (defn run-cypher-stmt-with-data-no-return
   "Run a cypher statement along with data to fill cypher placeholders"
   [cypher-statement node-data driver-session]
-
   (.writeTransaction
     driver-session
     (reify TransactionWork (execute [this tx]
@@ -105,3 +100,12 @@
                                    (.run tx
                                          cypher-statement
                                          node-data)])))))
+
+
+;; TESTING SECTION
+
+;;(import '[org.neo4j.driver GraphDatabase])
+;;(import '[org.neo4j.driver AuthTokens])
+;;(import '[org.neo4j.driver Values])
+;;(import '[org.neo4j.driver TransactionWork])
+

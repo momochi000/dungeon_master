@@ -33,7 +33,8 @@ extracted.
 CLOSED: [2024-01-08 Mon 19:48]
 ** DONE create prompt to extract entities etc from gpt response
 CLOSED: [2024-01-09 Tue 11:05]
-** TODO update the graph according to entities and relationships in json
+** DONE update the graph according to entities and relationships in json
+CLOSED: [2024-01-10 Wed 16:52]
 from gpt's response to extract entities
 
 MERGE alone is not sufficient to prevent re-insertion of entities.
@@ -43,7 +44,12 @@ if there is a record, i need to do something smart about the description
 I also shouldn't use ~id~ as a unique field, id is already a property of all nodes
 I'll want to come up with something else and add a unique constraint like
 ~CREATE CONSTRAINT ON (p:Person) ASSERT p.my_field IS UNIQUE~
-** TODO continue fleshing out fixture, use game chat from gpt
+** DONE continue fleshing out fixture, use game chat from gpt
+CLOSED: [2024-01-10 Wed 16:52]
+** TODO update repl with common includes
+i shouldn't have to include everything over and over to test things in the repl
+http://www.futurile.net/2020/03/07/clojure-lein-dev-experience-and-repl-tools/
+https://dev.solita.fi/2014/03/18/pimp-my-repl.html
 ** TODO create initial character sheet data structure
 and insert it into the game state somewhere
 ** TODO turn the results from neo4j query into some nested map structure
