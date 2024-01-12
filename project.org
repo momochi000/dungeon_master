@@ -46,12 +46,14 @@ I'll want to come up with something else and add a unique constraint like
 ~CREATE CONSTRAINT ON (p:Person) ASSERT p.my_field IS UNIQUE~
 ** DONE continue fleshing out fixture, use game chat from gpt
 CLOSED: [2024-01-10 Wed 16:52]
-** TODO update repl with common includes
+** DONE update repl with common includes
+CLOSED: [2024-01-12 Fri 13:52]
 i shouldn't have to include everything over and over to test things in the repl
 http://www.futurile.net/2020/03/07/clojure-lein-dev-experience-and-repl-tools/
 https://dev.solita.fi/2014/03/18/pimp-my-repl.html
 ** TODO create initial character sheet data structure
 and insert it into the game state somewhere
+** TODO add tests
 ** TODO turn the results from neo4j query into some nested map structure
 this is step 1 in an experiment. i don't know if this is the best representation
 of the graph to place in memory but the intent is to get closer to finding out.

@@ -1,12 +1,17 @@
 (ns dungeon-master.game.turn
-  (:require [dungeon-master.llm.gpt
-             :refer [run-completion
-                     get-result-message
-                     get-result-content
-                     generate-dm-prompt]]
-            [dungeon-master.game.data :refer [extract-entities]]
-            [dungeon-master.repositories.world-state :refer [update-db-world-state]]))
+  (:require 
+    [dungeon-master.llm.gpt :refer [run-completion
+                                    get-result-message
+                                    get-result-tool-arguments
+                                    generate-dm-prompt]]
+    [dungeon-master.game.data :refer [extract-entities]]
+    [dungeon-master.repositories.world-state :refer [update-db-world-state]]
+    [cheshire.core :as json]
+    ))
 
+(declare update-world-state)
+(declare call-gpt)
+(declare add-user-input-to-interaction-history)
 
 (defn run-turn
   "Execute a single game turn given some user input
@@ -25,10 +30,9 @@
   ;; present response to user
   )
 
-(defn add-user-input-to-interaction-history
+(defn- add-user-input-to-interaction-history
   [game-state user-input]
   (assoc game-state :interaction-history (conj (:interaction-history game-state) {:role "user" :content user-input})))
-
 
 (defn call-gpt
   [game-state]
@@ -40,8 +44,6 @@
       game-state
       :interaction-history
       (conj (:interaction-history game-state) result-message))))
-
-
 
 (defn update-world-state
   "given the latest message from the dungeon master, extract any new entities and/or
@@ -60,8 +62,8 @@
 ;;(require '[dungeon-master.game-state :as gs])
 ;;(require '[dungeon-master.llm.gpt :refer [run-completion generate-dm-prompt]])
 ;;(require '[cheshire.core :as json])
-(require '[dungeon-master.repositories.world-state :refer [update-db-world-state]])
-(require '[dungeon-master.llm.gpt :refer [generate-dm-prompt get-result-message get-result-content get-result-tool-calls get-result-tool-arguments run-completion]])
+;;(require '[dungeon-master.repositories.world-state :refer [update-db-world-state]])
+;;(require '[dungeon-master.llm.gpt :refer [generate-dm-prompt get-result-message get-result-content get-result-tool-calls get-result-tool-arguments run-completion]])
 ;;(require '[ dungeon-master.game.data :refer [extract-entities]])
 
 ;;

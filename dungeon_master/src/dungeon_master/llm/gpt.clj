@@ -1,5 +1,7 @@
 (ns dungeon-master.llm.gpt
-  (:require [wkok.openai-clojure.api :as api]))
+  (:require [wkok.openai-clojure.api :as api]
+            [dungeon-master.util :refer [last-n-elements]]
+            ))
 
 (def default-model "gpt-3.5-turbo")
 (def default-history-length 8)

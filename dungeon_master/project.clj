@@ -14,4 +14,19 @@
   :source-paths ["src"]
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all
-                       :jvm-opts ["-Dclojure.compiler.direct-linking=true"]}})
+                       :jvm-opts ["-Dclojure.compiler.direct-linking=true"]}
+             ;; I moved these to ~/.lein/profiles.clj
+             ;; but im not really a fan of that, i think it should go here
+             ;; so wherever i pull this repo i have access to these
+             ;;:dev {:plugins [
+             ;;                [lein-pprint "1.3.2"]
+             ;;                [io.aviso/pretty "1.4.4"]
+             ;;                ]}
+             ;;:repl {:plugins [
+             ;;                 [lein-pprint "1.3.2"]
+             ;;                 [io.aviso/pretty "1.4.4"]
+             ;;                 ]}
+
+             }
+  :repl-options {:init-ns dungeon-master.repl-ns}
+  )

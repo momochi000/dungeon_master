@@ -5,6 +5,14 @@
            [org.neo4j.driver TransactionWork])
   (:require [cheshire.core :as json]))
 
+
+(declare create-node)
+(declare create-person-node)
+(declare create-place-node)
+(declare create-relationship-from-string)
+(declare run-cypher-stmt-with-data)
+(declare run-cypher-stmt-with-data-no-return)
+
 (defn update-db-world-state
   "Given a map of entities and relationships, make appropriate insert or update
   statements into the graph db. Due to the interop with neo4j, the map expects
@@ -49,6 +57,9 @@
         ;;             "name" ("name" node-data)
         ;;             "description" ("description" node-data)) ]
     (run-cypher-stmt-with-data cypher-string node-data driver-session)))
+
+(declare create-relationship-statement)
+(declare decompose-relationship-string)
 
 (defn create-relationship-from-string
   "relate two nodes given the input string of the format
@@ -100,7 +111,6 @@
                                    (.run tx
                                          cypher-statement
                                          node-data)])))))
-
 
 ;; TESTING SECTION
 
