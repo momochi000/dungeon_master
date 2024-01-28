@@ -1,7 +1,6 @@
 (ns dungeon-master.repositories.world-state
   (:import [org.neo4j.driver GraphDatabase]
            [org.neo4j.driver AuthTokens]
-           [org.neo4j.driver Values]
            [org.neo4j.driver TransactionWork])
   (:require [cheshire.core :as json]))
 
@@ -51,6 +50,12 @@
   "create a place node"
   [node-data driver-session]
   (let [cypher-string "MERGE (p:Place {name_id: $id}) ON CREATE SET p.name = $name, p.description = $description RETURN (p)" ]
+        ;; in this commented code i was trying to use [org.neo4j.driver Values]
+        ;; which should be a type that the cypher statement accepts for it's parameters
+        ;; i.e. "MERGE (p) {name: $name_param}" would provide some guarantees
+        ;; around name_param if was given in a Values object, however, I
+        ;; couldn't get this to work. But i think this is the "right" way to do
+        ;; it, just need to figure it out
         ;;parameters (Values/parameters
         ;;             ;;(into {} (map (fn [[k v]] [(name k) v]) node-data))
         ;;             "id" ("id" node-data)
@@ -71,14 +76,13 @@
 (defn create-relationship-statement
   "relate two nodes with each other"
   [first-node-id relationship-type second-node-id]
-  (let [cypher-stmt (case relationship-type
-                      "IN" "MATCH (n1) WHERE n1.name_id = $start_node_id
-                           MATCH (n2) WHERE n2.name_id = $end_node_id
-                           MERGE (n1)-[:IN]->(n2)"
-                      "KNOWS" "MATCH (n1) WHERE n1.name_id = $start_node_id
-                              MATCH (n2) WHERE n2.name_id = $end_node_id
-                              MERGE (n1)-[:IN]->(n2)")
+  (let [cypher-stmt (format
+                      "MATCH (n1) WHERE n1.name_id = $start_node_id
+                      MATCH (n2) WHERE n2.name_id = $end_node_id
+                      MERGE (n1)-[:%s]->(n2)"
+                      relationship-type)
         cypher-params {"start_node_id" first-node-id "end_node_id" second-node-id} ]
+
     [cypher-stmt cypher-params]))
 
 (defn decompose-relationship-string
