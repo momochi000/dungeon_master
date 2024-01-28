@@ -1,10 +1,11 @@
 (ns dungeon-master.game.turn
-  (:require 
+  (:require
     [dungeon-master.llm.gpt :refer [run-completion
                                     get-result-message
                                     get-result-tool-arguments
-                                    generate-dm-prompt]]
+                                    generate-system-prompt]]
     [dungeon-master.game.data :refer [extract-entities]]
+    [dungeon-master.game.prompt :refer [generate-dm-prompts]]
     [dungeon-master.repositories.world-state :refer [update-db-world-state]]
     [cheshire.core :as json]
     ))
@@ -36,8 +37,10 @@
 
 (defn call-gpt
   [game-state]
-  (let [gpt-result (run-completion
-                     (generate-dm-prompt game-state))
+  (let [system-prompt (generate-system-prompt
+                        (:interaction-history game-state)
+                        (clojure.string/join ". " (generate-dm-prompts game-state)))
+        gpt-result (run-completion system-prompt)
         result-message (get-result-message gpt-result)]
 
     (assoc
@@ -65,17 +68,10 @@
 ;;(require '[dungeon-master.repositories.world-state :refer [update-db-world-state]])
 ;;(require '[dungeon-master.llm.gpt :refer [generate-dm-prompt get-result-message get-result-content get-result-tool-calls get-result-tool-arguments run-completion]])
 ;;(require '[ dungeon-master.game.data :refer [extract-entities]])
+;;(require '[dungeon-master.fixtures.test-world-state :refer :all])
 
-;;
-;;(add-to-interaction-history (gs/blank-game-state) "hello")
-;;(ns-aliases *ns*)
-;;(ns-publics gs)
-;;
-;;(def blank (gs/blank-game-state))
-;;(def test-input "something")
-;;
-;;(assoc blank :interaction-history (conj (:interaction-history blank) test-input))
-;;
-;;(add-user-input-to-interaction-history blank "hello")
-;;
-;;(run-turn blank "I enter the run-down tavern")
+
+
+;;(test-game-state)
+;;(run-turn (test-game-state) "I lean back in my chair and take a sip of my mead. Lord Dhelt, you've done yourself a great service coming in here today and meeting me. Please, ease your burdens some and tell me more about these 'delicate matters'.")
+

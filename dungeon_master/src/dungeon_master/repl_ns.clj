@@ -11,7 +11,4 @@
             [dungeon-master.game-state :refer :all]
             [dungeon-master.util :refer :all]
             [dungeon-master.game.turn :refer :all]
-            [dungeon-master.repositories.world-state :refer :all]
-
-            )
-  )
+            [dungeon-master.repositories.world-state :refer :all]))

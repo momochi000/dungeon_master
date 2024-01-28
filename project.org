@@ -51,9 +51,19 @@ CLOSED: [2024-01-12 Fri 13:52]
 i shouldn't have to include everything over and over to test things in the repl
 http://www.futurile.net/2020/03/07/clojure-lein-dev-experience-and-repl-tools/
 https://dev.solita.fi/2014/03/18/pimp-my-repl.html
-** TODO create initial character sheet data structure
+** DONE create initial character sheet data structure
+CLOSED: [2024-01-19 Fri 18:32]
 and insert it into the game state somewhere
+** DONE character sheet becomes part of the context
+CLOSED: [2024-01-27 Sat 17:34]
+at least some simple descriptive part of it
 ** TODO add tests
+** TODO figure out how to query the database on each turn
+to provide and generate the context needed for the current turn when calling the
+LLM
+user input -> extract entities -> cypher query?
+or user input -> vector search?
+or both..?
 ** TODO turn the results from neo4j query into some nested map structure
 this is step 1 in an experiment. i don't know if this is the best representation
 of the graph to place in memory but the intent is to get closer to finding out.
@@ -67,10 +77,6 @@ having to do anything fancy with turning a deeply nested map into a prompt
 somehow
 ** TODO Create some way to handle database setup
 e.g. create constraints and indices
-** TODO User input is converted into some request for data from the database
-user input -> extract entities -> cypher query?
-or user input -> vector search?
-or both..?
 * Notes
 ** neo4j
 *** databases

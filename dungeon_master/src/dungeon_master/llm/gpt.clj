@@ -5,8 +5,7 @@
 
 (def default-model "gpt-3.5-turbo")
 (def default-history-length 8)
-(def dm-system-prompt
-  "You are an experienced dungeon master who loves running all kinds of paper and pencil campaigns for your players. Your goals are to: 1. Ensure your players are having fun, 2. Enforce a consistent world with fixed rules and consistent characters")
+
 
 (def extract-entities-prompt
   "From the given text extract the following Entities & relationships described in the mentioned format
@@ -58,14 +57,14 @@ Please ensure the output is valid json")
                                                         :items {:type "string"
                                                                 :description "string indicating relationship between entities, of the form from_entity_id|RelationshipType|to_entity_id"}}}}}})
 
-(defn generate-dm-prompt
+(defn generate-system-prompt
   "based on the current game state, generate the necessary prompt to send to the llm
    currently this depends on the current game mode and interaction history. For example, it depends on the player having entered some input, however, in the future, it may develop a different prompt if the user has not entered anything. For example, when starting a new session."
-  [game-state]
+  [chat-history dm-prompt]
 
   (cons
-    {:role "system" :content dm-system-prompt}
-    (last-n-elements (:interaction-history game-state) default-history-length)))
+    {:role "system" :content dm-prompt}
+    (last-n-elements chat-history default-history-length)))
 
 ;; example return value and shape of `run-completion`
 ;;{:id "chatcmpl-8fHPpRYsZ9kEbGQQjAWXKcn85nGK7",
@@ -124,12 +123,8 @@ Please ensure the output is valid json")
   [gpt-response]
   (-> gpt-response get-result-tool-calls :function :arguments))
 
-(defn test-user-action
-  "general user input to the LLM"
-  [user-input]
-  (let [test-messages [{:role "system" :content dm-system-prompt}
-                         {:role "user" :content user-input} ]]
-    (run-completion test-messages)))
+
+
 
 
 ;; TESTING SECTION
@@ -140,3 +135,9 @@ Please ensure the output is valid json")
 ;;(:message (first (:choices gpt-result)))
 ;;
 ;;(-> gpt-result :choices first :message)
+;;(defn test-user-action
+;;  "general user input to the LLM"
+;;  [user-input]
+;;  (let [test-messages [{:role "system" :content "some generic prompt"}
+;;                         {:role "user" :content user-input} ]]
+;;    (run-completion test-messages)))
