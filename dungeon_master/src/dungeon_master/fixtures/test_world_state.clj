@@ -40,6 +40,8 @@
     ]
 }")
 
+;;(require '[dungeon-master.game-state :refer [->GameState]])
+
 (defn test-game-state
   []
   (->GameState
@@ -53,7 +55,10 @@
      {:role "assistant" :content "The bartender offers a slight nod, his eyes momentarily reflecting a bit of the wear and tear of a life spent within the thick walls of the tavern. \"Name's Coran,\" he says, extending a hand calloused from years of hard work behind the bar. \"Anything else you need, just holler.\"\n\nCoran then proceeds to assist another customer at the other end of the bar, giving you the space to either approach the noble or check out the notice board for any mercenary work. The atmosphere in the tavern hums with the potential for opportunity, whether it be quiet dealings with troubled nobles or the promise of adventure and coin pinned to the board."}
      {:role "assistant" :content "You carry your mug and casually move closer to where Coran indicated, all while keeping a relaxed demeanor. You find a spot where you can quietly observe the noble without drawing undue attention to yourself.\n\nThe nobleman is a well-dressed individual with an air of urgency about him, easily standing out from the rougher clientele of the tavern. While his clothes are of fine quality, there is a certain dishevelment to his appearance that suggests recent distress. You notice a signet ring with a family crest—an indicator of his status and wealth—on his finger as he nervously taps it on the table.\n\nHe's currently alone, nursing a drink of his own, and his eyes frequently dart toward the entrance, as if expecting someone. The lines of worry on his youthful face suggest that whatever burden he carries, it is both heavy and immediate.\n\nYou sense that timing might be crucial in approaching him. He looks as though he's on the verge of leaving or making a decision. Your warrior instincts tell you that offering your services could be both opportune and potentially rewarding, whether it be in the form of gold or alliances."}
      {:role "assistant" :content "The nobleman seems taken aback for a moment as you sit down, but your easy smile and non-threatening demeanor seem to put him partially at ease. He studies you for a moment, his eyes running over your warrior's build and the confidence with which you carry yourself. He then offers a weak smile in return, although the worry doesn't entirely leave his eyes.\n\n\"Indeed, it seems the day has decided to serve me a cold dish of troubles rather than a warm meal,\" he says, his voice carrying a cultured accent. He hesitates, as if weighing his need for help against the risk of trusting a stranger. \"I am Lord Dhelt of Amn, and I find myself in... a certain predicament that requires discretion and... a certain set of skills.\"\n\nHe takes a moment to ensure no one is eavesdropping before continuing. \"The 'gentlemen' you speak of were less than gentlemanly once their true colors shone through. I'm in need of someone who can handle... delicate matters with strength and resolve. Perhaps I am fortunate that the Sour Mother sent you to my table instead of further ill tidings.\"\n\nHis posture shifts slightly, indicating a readiness to discuss business. \"If you're willing to lend your blade and your wits to a noble cause, I can assure you that you will be handsomely rewarded,\" Lord Dhelt offers with a hopeful note in his voice, the promise of gold clear in his implication."}
-     ]))
+     ]
+    (build-blank-char-sheet "Torynn")
+
+    ))
 
 ;; TODO: update this to take in or read the config for the graph database
 (defn insert-test-world-state
@@ -93,7 +98,8 @@
 ;;(import '(org.neo4j.driver Values))
 ;;(require '[cheshire.core :as json])
 ;;(require '[dungeon-master.repositories.world-state :refer [create-node create-relationship-from-string]])
-;;(require '[dungeon-master.game-state :refer [GameState]])
+;;(require '[dungeon-master.game-state :refer [->GameState]])
+;;(require '[dungeon-master.game.data.character-sheet :refer [build-blank-char-sheet]])
 
 ;;(insert-test-world-state)
 
