@@ -4,3 +4,10 @@ repl:
 
 nix-repl:
 	nix-shell --command "cd dungeon_master; lein repl :start :port 61799"
+
+dungeon-shell:
+	docker-compose run --rm dungeon bash
+
+tests:
+	docker-compose run --rm dungeon lein test
+
