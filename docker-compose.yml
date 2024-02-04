@@ -7,6 +7,7 @@ services:
       - ./dungeon_master:/app/
     environment:
       - OPENAI_API_KEY=$OPENAI_API_KEY
+      - DATABASE_URL=bolt://graphdb:7687
     ports:
       - "61799:61799"
     tty: true

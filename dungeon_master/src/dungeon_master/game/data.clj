@@ -1,10 +1,17 @@
 (ns dungeon-master.game.data
-  (:require [dungeon-master.game-state :refer [get-last-message]]
-            [dungeon-master.llm.gpt :refer [run-function-completion extract-entities-prompt]]))
+  (:require [cheshire.core :as json]
+            [dungeon-master.repositories.util :refer [clear-db]]
+            [dungeon-master.game-state :refer [get-last-message]]
+            [dungeon-master.llm.gpt :refer [run-function-completion extract-entities-prompt]]
+            [dungeon-master.fixtures.test-world-state :refer [fixture-json-string
+                                                              test-game-state
+                                                              insert-test-world-state]]
+
+            ))
 
 
-(require '[dungeon-master.game-state :refer [get-last-message]])
-(require '[ dungeon-master.llm.gpt :refer [run-function-completion extract-entities-prompt]])
+;;(require '[dungeon-master.game-state :refer [get-last-message]])
+;;(require '[ dungeon-master.llm.gpt :refer [run-function-completion extract-entities-prompt]])
 
 (defn extract-entities
   "obtain entities from the last message in the interaction history.
@@ -16,3 +23,15 @@
                              {:role "user" :content last-message}]]
 
     (run-function-completion completion-messages :extract-entities)))
+
+;; this is what i can use to start playtesting the game
+(defn initialize-strawman-state
+  "For now, create an expected version of game state. Just use the fixture we set up in test_world_state"
+  []
+  (println "DEBUG: do nothing yet")
+  ;; clear the database
+  (clear-db)
+  ;; insert the strawman data into the db
+  (insert-test-world-state (json/parse-string fixture-json-string))
+  ;; returnthe dummy game state
+  (test-game-state))

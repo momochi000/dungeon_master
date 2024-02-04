@@ -2,7 +2,8 @@
   (:import [org.neo4j.driver GraphDatabase]
            [org.neo4j.driver AuthTokens]
            [org.neo4j.driver TransactionWork])
-  (:require [cheshire.core :as json]))
+  (:require [dungeon-master.config :refer [database-url]]
+            [cheshire.core :as json]))
 
 
 (declare create-node)
@@ -12,13 +13,15 @@
 (declare run-cypher-stmt-with-data)
 (declare run-cypher-stmt-with-data-no-return)
 
+
+;; TODO: get the database url using some sort of application configuration
 (defn update-db-world-state
   "Given a map of entities and relationships, make appropriate insert or update
   statements into the graph db. Due to the interop with neo4j, the map expects
   keys as strings."
   [entities-map]
-  (with-open [driver (GraphDatabase/driver "bolt://graphdb:7687" (AuthTokens/none))]
-  ;;(with-open [driver (GraphDatabase/driver "bolt://localhost:7687" (AuthTokens/none))]
+  ;;(with-open [driver (GraphDatabase/driver "bolt://graphdb:7687" (AuthTokens/none))]
+  (with-open [driver (GraphDatabase/driver database-url (AuthTokens/none))]
     (with-open [session (.session driver)]
       (let [entities (entities-map "entities")
             relationships (entities-map "relationships") ]

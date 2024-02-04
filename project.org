@@ -58,6 +58,19 @@ and insert it into the game state somewhere
 CLOSED: [2024-01-27 Sat 17:34]
 at least some simple descriptive part of it
 ** TODO add tests
+** TODO create/expose primary interface
+the game loop where I can type somethign in and execute ~run-turn~ every turn
+** TODO fix environment variable setting
+
+i shouldn't have to pass in environment variables to set the database url, it
+should be set as bolt://graphdb:<port> as given by the docker-compose config.
+but for the nix repl environment i need it to be "bolt://localhost"
+
+These should be things i can set in the project.clj and profiles.clj files but
+they aren't working.
+** TODO move game_state.clj under game/
+** TODO set up a beginning game state
+** TODO playtest
 ** TODO figure out how to query the database on each turn
 to provide and generate the context needed for the current turn when calling the
 LLM
@@ -75,6 +88,10 @@ perhaps the best way to represent the graph is simply a graphviz dot text format
 I believe GPT is smart enough to read that and understand the structure without
 having to do anything fancy with turning a deeply nested map into a prompt
 somehow
+
+I don't actually have to do anything here. I can just take the output of neo4j
+as a string or a table -> string and feed that directly into the prompt. GPT is
+smart enough to know how to understand it.
 ** TODO Create some way to handle database setup
 e.g. create constraints and indices
 * Notes
