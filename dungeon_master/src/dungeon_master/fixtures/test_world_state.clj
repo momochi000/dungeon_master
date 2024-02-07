@@ -5,7 +5,8 @@
            [org.neo4j.driver TransactionWork])
   (:require [cheshire.core :as json]
             [dungeon-master.config :refer [database-url]]
-            [dungeon-master.game-state :refer [GameState]]
+            [dungeon-master.game-state :refer [->GameState]]
+            [dungeon-master.game.data.character-sheet :refer [build-blank-char-sheet]]
             [dungeon-master.repositories.world-state
              :refer [create-node
                      create-relationship-from-string]]))

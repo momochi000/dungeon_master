@@ -28,10 +28,13 @@
 (defn initialize-strawman-state
   "For now, create an expected version of game state. Just use the fixture we set up in test_world_state"
   []
-  (println "DEBUG: do nothing yet")
   ;; clear the database
+  (println "DEBUG: initialize-strawman-state: clearing the db")
   (clear-db)
+
   ;; insert the strawman data into the db
+  (println "DEBUG: initialize-strawman-state: inserting strawman data into the db")
   (insert-test-world-state (json/parse-string fixture-json-string))
-  ;; returnthe dummy game state
+  ;; return the dummy game state
+  (println "DEBUG: initialize-strawman-state: returning the dummy game state")
   (test-game-state))

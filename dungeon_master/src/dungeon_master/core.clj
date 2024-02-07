@@ -1,8 +1,7 @@
 (ns dungeon-master.core
-  (:require [dungeon-master.game.data :refer [initialize-strawman-state]
-
-             ])
-  
+  (:require [dungeon-master.game.data :refer [initialize-strawman-state]]
+             [dungeon-master.interface.cli :refer [game-loop]]
+             )
   (:gen-class))
 
 ;(defn -main
@@ -26,9 +25,10 @@
   ;; this also clears the db and sets it fresh
   (let [initial-game-state (initialize-strawman-state)]
     ;; print out the last system prompt
+    (println "The story left off.....")
+    ;(println (get-last-message initial-game-state))
+
 
     ;; start the game loop
-    ;; need to figure out how to infinitely loop, taking in user input
-    )
-
-  )
+    (game-loop initial-game-state)
+    ))

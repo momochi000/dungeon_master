@@ -68,6 +68,8 @@ but for the nix repl environment i need it to be "bolt://localhost"
 
 These should be things i can set in the project.clj and profiles.clj files but
 they aren't working.
+** TODO Replace usage of TransactionWork
+TransactionWork is deprecated in favor of TransactionCallback
 ** TODO move game_state.clj under game/
 ** TODO set up a beginning game state
 ** TODO playtest
@@ -115,3 +117,6 @@ neo4j begins with 2 databases:
 +--------------------------------------------------+-------------------------------------------------------------------+
 | Committed, or rolled back, by the user.          | Committed automatically when a transactions finishes successfully. |
 +--------------------------------------------------+-------------------------------------------------------------------+
+*** documentation
+**** bolt driver wiki
+https://github.com/neo4j/neo4j-java-driver/wiki
