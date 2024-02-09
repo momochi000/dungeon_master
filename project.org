@@ -57,11 +57,24 @@ and insert it into the game state somewhere
 ** DONE character sheet becomes part of the context
 CLOSED: [2024-01-27 Sat 17:34]
 at least some simple descriptive part of it
-** TODO add tests
-** TODO create/expose primary interface
+** DONE create/expose primary interface
+CLOSED: [2024-02-08 Thu 22:21]
 the game loop where I can type somethign in and execute ~run-turn~ every turn
-** TODO fix environment variable setting
 
+I think this is kinda working now, but there were several bugs that had shown themselves:
++ it looped infinitely once not waiting to take user input
+** TODO add tests
+** TODO Update prompt so DM doesn't speak for player :bug:
++ it spoke for me, "please, my good friend, call me Torynn," you continue ...
+** TODO Crashed once when node type wasn't recognized :bug:
+came back as "group" rather than person or place
++ create node failed when gpt passed back "group" rather than place or person
+I need to add that as a node type.
+maybe i should be open to gpt suggesting more node types
+** TODO infinite loop not waiting for user input? :bug:
++ it looped infinitely once not waiting to take user input
+doesn't seem to be happening anymore
+** TODO fix environment variable setting
 i shouldn't have to pass in environment variables to set the database url, it
 should be set as bolt://graphdb:<port> as given by the docker-compose config.
 but for the nix repl environment i need it to be "bolt://localhost"
@@ -70,6 +83,7 @@ These should be things i can set in the project.clj and profiles.clj files but
 they aren't working.
 ** TODO Replace usage of TransactionWork
 TransactionWork is deprecated in favor of TransactionCallback
+https://neo4j.com/docs/api/java-driver/current/org.neo4j.driver/org/neo4j/driver/TransactionWork.html
 ** TODO move game_state.clj under game/
 ** TODO set up a beginning game state
 ** TODO playtest

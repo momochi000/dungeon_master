@@ -18,7 +18,7 @@
   "Execute a single game turn given some user input
    This is where the magic (will) happens"
   [game-state user-input]
-  (println "DEBUG: in run-turn, the input is " user-input)
+  ;;(println "DEBUG: in run-turn, the input is " user-input)
   (-> game-state
       (add-user-input-to-interaction-history user-input)
       ;; decide needed context from input
@@ -32,7 +32,8 @@
       update-world-state)
   )
 
-(defn- add-user-input-to-interaction-history
+;;(defn- add-user-input-to-interaction-history
+(defn add-user-input-to-interaction-history ;; making this public while debugging
   [game-state user-input]
   (assoc game-state :interaction-history (conj (:interaction-history game-state) {:role "user" :content user-input})))
 

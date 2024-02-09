@@ -39,6 +39,7 @@
 
 (defn create-node
   [node-data driver-session]
+  (println "DEBUG: in create-node, node-data is ----> " node-data)
   (case (node-data "label")
     "Place" (create-place-node node-data driver-session)
     "Person" (create-person-node node-data driver-session)))
