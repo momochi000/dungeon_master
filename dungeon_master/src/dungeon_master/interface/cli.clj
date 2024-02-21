@@ -12,7 +12,7 @@
   "work in progress attempt at a loop to play this game"
   [initial-state]
 
-  
+
   (loop [curr-state initial-state]
     ;;(println "DEBUG: TURN START: current game state is ")
     ;;(println curr-state)
@@ -22,6 +22,6 @@
 
     (let [user-command (read-line)]
       ;;(println "DEBUG: spitting back input: " user-command)
-      (println "DEBUG: last 3 interactions: " (take-last 3 (:interaction-history curr-state)))
+      ;;(println "DEBUG: last 3 interactions: " (take-last 3 (:interaction-history curr-state)))
       (recur (run-turn curr-state user-command)))
     ))

@@ -10,5 +10,9 @@ The project is heavily under development and at the moment the only thing you ca
 To do this:
 
     docker-compose up --build
-    
-unfortunately, i wasn't able to connect to the repl from outside of the docker container, so currently I'm using nix. I start this with `make nix-repl`
+
+this will also start the neo4j database, which includes a web interface you can reach at `localhost:7474`. By default there is no authentication.
+
+Unfortunately, i wasn't able to connect to the repl from outside of the docker container, so currently I'm using nix. I start this with `make nix-repl`
+
+Run the command line interface with `make play`, but note this expects the database to be running.

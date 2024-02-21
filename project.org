@@ -63,9 +63,49 @@ the game loop where I can type somethign in and execute ~run-turn~ every turn
 
 I think this is kinda working now, but there were several bugs that had shown themselves:
 + it looped infinitely once not waiting to take user input
-** TODO add tests
-** TODO Update prompt so DM doesn't speak for player :bug:
+** DONE Update prompt so DM doesn't speak for player :bug:
+CLOSED: [2024-02-09 Fri 16:33]
 + it spoke for me, "please, my good friend, call me Torynn," you continue ...
+** TODO add tests
+** TODO need to accept nodes of type item
+the npc described a moonstone pendant, it was not inserted into the knowledge
+graph.
+** TODO figure out how to query the database on each turn
+to provide and generate the context needed for the current turn when calling the
+LLM
+user input -> extract entities -> cypher query?
+or user input -> vector search?
+or both..?
+
+the question is, what is the subject of the query? I think basically i need to consider who should know what. What should the player know? what should the relevan nearby npcs know? what does the DM need to know?
+These answers will probably reveal themselves under more playtesting.
+** TODO problem: how to invalidate world state?
+or how to handle contradictory information?
+i have a graph which shows an npc both at amn and at baldurs gate
+
+in this case i condsider it a bug. He /was/ at amn, but now is in baldurs gate,
+but the procedure which updates the world state inserted both though he was only
+talking about being at amn previously.
+
+however, it is very conceivable that one could be at some location and then
+later move to another location, at which point they should no longer have the
+=AT= relationship to the other place.
+
+Perhaps an entity should only be allowed a single =AT= relationship? but then
+what if there were rumors about a thing. maybe it's rumored that some artifact
+is here, there, or elsewhere, and it's actual location isn't known...?
+** TODO crash at json parse :bug:
+what a crappy error message, no insight into where in my code things went wrong
+
+Execution error (JsonParseException) at com.fasterxml.jackson.core.JsonParser/_constructError (JsonParser.java:2477).
+Unexpected character (']' (code 93)): expected a valid value (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: (StringReader); line: 4, column: 4]
+
+Full report at:
+/tmp/clojure-12333066275953008635.edn
+make: *** [play] Error 1
+
+I suspect openai returned an invalid json
 ** TODO Crashed once when node type wasn't recognized :bug:
 came back as "group" rather than person or place
 + create node failed when gpt passed back "group" rather than place or person
@@ -74,6 +114,7 @@ maybe i should be open to gpt suggesting more node types
 ** TODO infinite loop not waiting for user input? :bug:
 + it looped infinitely once not waiting to take user input
 doesn't seem to be happening anymore
+** TODO learn and implement async
 ** TODO fix environment variable setting
 i shouldn't have to pass in environment variables to set the database url, it
 should be set as bolt://graphdb:<port> as given by the docker-compose config.
@@ -87,12 +128,6 @@ https://neo4j.com/docs/api/java-driver/current/org.neo4j.driver/org/neo4j/driver
 ** TODO move game_state.clj under game/
 ** TODO set up a beginning game state
 ** TODO playtest
-** TODO figure out how to query the database on each turn
-to provide and generate the context needed for the current turn when calling the
-LLM
-user input -> extract entities -> cypher query?
-or user input -> vector search?
-or both..?
 ** TODO turn the results from neo4j query into some nested map structure
 this is step 1 in an experiment. i don't know if this is the best representation
 of the graph to place in memory but the intent is to get closer to finding out.
