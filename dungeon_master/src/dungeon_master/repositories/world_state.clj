@@ -40,9 +40,21 @@
 (defn create-node
   [node-data driver-session]
   (println "DEBUG: in create-node, node-data is ----> " node-data)
-  (case (node-data "label")
-    "Place" (create-place-node node-data driver-session)
-    "Person" (create-person-node node-data driver-session)))
+
+  ;; This is a bit iffy, I should implement some controls on what can be passed in here as node types
+  ;; interpolating into raw database command is risky
+  (let [cypher-string
+        (str
+          "MERGE (p:"
+          (node-data "label")
+          "{name_id: $id}) ON CREATE SET p.name = $name, p.description = $description RETURN (p)" )
+        ]
+    (run-cypher-stmt-with-data cypher-string node-data driver-session))
+
+  ;;(case (node-data "label")
+  ;;  "Place" (create-place-node node-data driver-session)
+  ;;  "Person" (create-person-node node-data driver-session))
+  )
 
 (defn create-person-node
   "create a person node"
