@@ -11,3 +11,8 @@ dungeon-shell:
 tests:
 	docker-compose run --rm dungeon lein test
 
+run:
+	docker-compose up
+
+play:
+	docker-compose run --rm dungeon lein run
