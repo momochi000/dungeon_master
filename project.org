@@ -66,10 +66,42 @@ I think this is kinda working now, but there were several bugs that had shown th
 ** DONE Update prompt so DM doesn't speak for player :bug:
 CLOSED: [2024-02-09 Fri 16:33]
 + it spoke for me, "please, my good friend, call me Torynn," you continue ...
-** TODO add tests
-** TODO need to accept nodes of type item
+** DONE need to accept nodes of type item
+CLOSED: [2024-02-23 Fri 10:49]
 the npc described a moonstone pendant, it was not inserted into the knowledge
 graph.
+maybe i should just allow it to insert arbitrary types of nodes
+
+I believe this is working but it's a bit sketchy. Don't like passing raw text into a database query. I need some controls on this.
+** DONE Add quit game command
+CLOSED: [2024-02-23 Fri 18:58]
+** TODO ability to save and load the game
+this implies that i can somehow keep graphs separate. How do I like index a
+"game world" such that queries in one cannot ever cross over into queries of
+another? i suppose that'd be a form of partitioning.
+
+I would also need to be able to persist the character sheet and other game state
+
+after some research it apears that neo4j doesn't support partitioning in that way. Either you logically partition things by adding an arbitrary attribute to everything, or you simply create a separate database instance
+
+What I could do is use something akin to =pg_dump= and =pg_restore=
+Neo4j has neo4j-admin dump and load
+
+Dump the database:
+  ```shell
+  $NEO4J_HOME/bin/neo4j-admin dump --database=your-database-name --to=/path/to/destination/dumpfilename.dump
+  ```
+
+**neo4j-admin load**: This command is used to restore a database from a dump file created by `neo4j-admin dump`. Prior to using this command, the database must be stopped, and the target database should not exist.
+
+   Load the database from a dump:
+   ```shell
+   $NEO4J_HOME/bin/neo4j-admin load --from=/path/to/source/dumpfilename.dump --database=your-database-name --force
+   ```
+
+
+this implies I should also back up the character sheet and other game state data
+into the database before dumping it.
 ** TODO figure out how to query the database on each turn
 to provide and generate the context needed for the current turn when calling the
 LLM
@@ -79,6 +111,15 @@ or both..?
 
 the question is, what is the subject of the query? I think basically i need to consider who should know what. What should the player know? what should the relevan nearby npcs know? what does the DM need to know?
 These answers will probably reveal themselves under more playtesting.
+** TODO ignore empty inputs
+if user just hits enter, don't execute a turn.
+** TODO accept and parse commands
+if input is something like ~/exit~, they can quit
+** TODO have some kind of prompt before user input
+at least a ~>~ or something
+** TODO add tests
+what sorts of tests? I need to think and design them. This will also inform how
+I should restructure my code.
 ** TODO problem: how to invalidate world state?
 or how to handle contradictory information?
 i have a graph which shows an npc both at amn and at baldurs gate
@@ -122,6 +163,9 @@ but for the nix repl environment i need it to be "bolt://localhost"
 
 These should be things i can set in the project.clj and profiles.clj files but
 they aren't working.
+** TODO Sanitize node insertion into knowledge graph
+currently i just take the node type returned by gpt and stick it into a query.
+This has risk. Need to sanitize
 ** TODO Replace usage of TransactionWork
 TransactionWork is deprecated in favor of TransactionCallback
 https://neo4j.com/docs/api/java-driver/current/org.neo4j.driver/org/neo4j/driver/TransactionWork.html
