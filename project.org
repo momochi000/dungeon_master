@@ -75,6 +75,9 @@ maybe i should just allow it to insert arbitrary types of nodes
 I believe this is working but it's a bit sketchy. Don't like passing raw text into a database query. I need some controls on this.
 ** DONE Add quit game command
 CLOSED: [2024-02-23 Fri 18:58]
+** DONE ignore empty inputs
+CLOSED: [2024-03-01 Fri 12:55]
+if user just hits enter, don't execute a turn.
 ** TODO ability to save and load the game
 this implies that i can somehow keep graphs separate. How do I like index a
 "game world" such that queries in one cannot ever cross over into queries of
@@ -111,8 +114,16 @@ or both..?
 
 the question is, what is the subject of the query? I think basically i need to consider who should know what. What should the player know? what should the relevan nearby npcs know? what does the DM need to know?
 These answers will probably reveal themselves under more playtesting.
-** TODO ignore empty inputs
-if user just hits enter, don't execute a turn.
+** TODO make updating world state asynchronous
+user types their input, new turn is evaluated and the LLM responds with the
+result of the user's action.
+
+The LLM output is then examined by another LLM call so that entities and
+relationships may be extracted. These entities and relationships are added to
+the graph db.
+
+I want to make the above process async, since it shouldn't block the user from
+taking their next action.
 ** TODO accept and parse commands
 if input is something like ~/exit~, they can quit
 ** TODO have some kind of prompt before user input
@@ -155,7 +166,6 @@ maybe i should be open to gpt suggesting more node types
 ** TODO infinite loop not waiting for user input? :bug:
 + it looped infinitely once not waiting to take user input
 doesn't seem to be happening anymore
-** TODO learn and implement async
 ** TODO fix environment variable setting
 i shouldn't have to pass in environment variables to set the database url, it
 should be set as bolt://graphdb:<port> as given by the docker-compose config.

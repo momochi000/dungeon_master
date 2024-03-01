@@ -37,11 +37,14 @@
   (println "TEST COMMAND RECEIVED")
   true)
 
+(defn ignore-command [] true)
+
 (defn parse-user-command
   "handle non-game command input. Things like exit game or print debug info"
   [user-command]
   (let [command-list [[#"^/exit" quit-game]
                        [#"^/quit" quit-game]
+                       [#"^$" ignore-command]
                        [#"^/debug" test-command]]
         matched-command (some
                           (fn [[command-regex action-function]]
