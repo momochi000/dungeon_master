@@ -7,9 +7,9 @@
             [dungeon-master.config :refer [database-url]]
             [dungeon-master.game-state :refer [->GameState]]
             [dungeon-master.game.data.character-sheet :refer [build-blank-char-sheet]]
-            [dungeon-master.repositories.world-state
-             :refer [create-node
-                     create-relationship-from-string]]))
+            [dungeon-master.repositories.world-state :refer [create-relationship-from-string]]
+            [dungeon-master.repositories.util :refer [create-node]]
+            ))
 
 ;; These are the statements we want to run.
 ;;-- CREATE CONSTRAINT IF NOT EXISTS FOR (p:Person) REQUIRE (p.name) IS UNIQUE;
@@ -44,8 +44,7 @@
 
 ;;(require '[dungeon-master.game-state :refer [->GameState]])
 
-(defn test-game-state
-  []
+(def test-game-state
   (->GameState
     :normal
     {}

@@ -5,7 +5,6 @@
             ))
 
 
-
 (declare parse-user-command)
 ;; I'm not sure how this should work so this is just scratch until i get a
 ;; better handle on it

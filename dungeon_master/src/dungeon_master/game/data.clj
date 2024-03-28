@@ -13,6 +13,7 @@
 ;;(require '[dungeon-master.game-state :refer [get-last-message]])
 ;;(require '[ dungeon-master.llm.gpt :refer [run-function-completion extract-entities-prompt]])
 
+;; TODO: This probably shouldn't take the game state but the last message directly
 (defn extract-entities
   "obtain entities from the last message in the interaction history.
   Sends a request to the llm asking it to identify entities and their

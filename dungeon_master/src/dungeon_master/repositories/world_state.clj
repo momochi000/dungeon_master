@@ -1,17 +1,15 @@
 (ns dungeon-master.repositories.world-state
   (:import [org.neo4j.driver GraphDatabase]
-           [org.neo4j.driver AuthTokens]
-           [org.neo4j.driver TransactionWork])
+           [org.neo4j.driver AuthTokens])
   (:require [dungeon-master.config :refer [database-url]]
+            [dungeon-master.repositories.util :refer [create-node
+                                                      create-relationship-statement
+                                                      run-cypher-stmt-with-data
+                                                      run-cypher-stmt-with-data-no-return]]
             [cheshire.core :as json]))
 
 
-(declare create-node)
-(declare create-person-node)
-(declare create-place-node)
 (declare create-relationship-from-string)
-(declare run-cypher-stmt-with-data)
-(declare run-cypher-stmt-with-data-no-return)
 
 
 ;; TODO: get the database url using some sort of application configuration
@@ -20,7 +18,6 @@
   statements into the graph db. Due to the interop with neo4j, the map expects
   keys as strings."
   [entities-map]
-  ;;(with-open [driver (GraphDatabase/driver "bolt://graphdb:7687" (AuthTokens/none))]
   (with-open [driver (GraphDatabase/driver database-url (AuthTokens/none))]
     (with-open [session (.session driver)]
       (let [entities (entities-map "entities")
@@ -36,25 +33,6 @@
                    (create-relationship-from-string relationship-data session))
                  relationships))))))
 
-
-(defn create-node
-  [node-data driver-session]
-  (println "DEBUG: in create-node, node-data is ----> " node-data)
-
-  ;; This is a bit iffy, I should implement some controls on what can be passed in here as node types
-  ;; interpolating into raw database command is risky
-  (let [cypher-string
-        (str
-          "MERGE (p:"
-          (node-data "label")
-          "{name_id: $id}) ON CREATE SET p.name = $name, p.description = $description RETURN (p)" )
-        ]
-    (run-cypher-stmt-with-data cypher-string node-data driver-session))
-
-  ;;(case (node-data "label")
-  ;;  "Place" (create-place-node node-data driver-session)
-  ;;  "Person" (create-person-node node-data driver-session))
-  )
 
 (defn create-person-node
   "create a person node"
@@ -79,7 +57,6 @@
         ;;             "description" ("description" node-data)) ]
     (run-cypher-stmt-with-data cypher-string node-data driver-session)))
 
-(declare create-relationship-statement)
 (declare decompose-relationship-string)
 
 (defn create-relationship-from-string
@@ -89,18 +66,6 @@
   (let [[cypher-query cypher-params] (apply create-relationship-statement (decompose-relationship-string input))]
     (run-cypher-stmt-with-data-no-return cypher-query cypher-params driver-session)))
 
-(defn create-relationship-statement
-  "relate two nodes with each other"
-  [first-node-id relationship-type second-node-id]
-  (let [cypher-stmt (format
-                      "MATCH (n1) WHERE n1.name_id = $start_node_id
-                      MATCH (n2) WHERE n2.name_id = $end_node_id
-                      MERGE (n1)-[:%s]->(n2)"
-                      relationship-type)
-        cypher-params {"start_node_id" first-node-id "end_node_id" second-node-id} ]
-
-    [cypher-stmt cypher-params]))
-
 (defn decompose-relationship-string
   "convert string of form
   node_1_id|RELATIONSHIP_TYPE|node_2_id
@@ -109,33 +74,9 @@
   (clojure.string/split input #"\|"))
 
 
-(defn run-cypher-stmt-with-data
-  "Run a cypher statement along with data to fill cypher placeholders"
-  [cypher-statement node-data driver-session]
-  (.writeTransaction
-    driver-session
-    (reify TransactionWork (execute [this tx]
-                             (let [result
-                                   (.run tx
-                                         cypher-statement
-                                         node-data)]
-                               (.single result))))))
-
-(defn run-cypher-stmt-with-data-no-return
-  "Run a cypher statement along with data to fill cypher placeholders"
-  [cypher-statement node-data driver-session]
-  (.writeTransaction
-    driver-session
-    (reify TransactionWork (execute [this tx]
-                             (let [result
-                                   (.run tx
-                                         cypher-statement
-                                         node-data)])))))
-
 ;; TESTING SECTION
 
 ;;(import '[org.neo4j.driver GraphDatabase])
 ;;(import '[org.neo4j.driver AuthTokens])
 ;;(import '[org.neo4j.driver Values])
 ;;(import '[org.neo4j.driver TransactionWork])
-

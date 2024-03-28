@@ -21,6 +21,7 @@
   "The main entry point to the program."
   [& args]
   (println "Dungeon master (working title) v0.1.0")
+
   ;; set up the strawman game state for testing
   ;; this also clears the db and sets it fresh
   (let [initial-game-state (initialize-strawman-state)]

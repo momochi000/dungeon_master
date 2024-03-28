@@ -50,6 +50,7 @@
       :interaction-history
       (conj (:interaction-history game-state) result-message))))
 
+;; TODO: this should happen asynchronously.
 (defn update-world-state
   "given the latest message from the dungeon master, extract any new entities and/or
   relationships and update the graph db accordingly"
