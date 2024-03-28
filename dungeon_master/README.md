@@ -11,7 +11,7 @@ See the top level readme file
 
 ## License
 
-Copyright © 2023 FIXME
+Copyright © 2023 Zachery Chin
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License 2.0 which is available at

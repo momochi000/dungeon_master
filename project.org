@@ -78,6 +78,9 @@ CLOSED: [2024-02-23 Fri 18:58]
 ** DONE ignore empty inputs
 CLOSED: [2024-03-01 Fri 12:55]
 if user just hits enter, don't execute a turn.
+** DONE accept and parse commands
+CLOSED: [2024-03-25 Mon 21:23]
+if input is something like ~/exit~, they can quit
 ** TODO ability to save and load the game
 this implies that i can somehow keep graphs separate. How do I like index a
 "game world" such that queries in one cannot ever cross over into queries of
@@ -102,9 +105,22 @@ Dump the database:
    $NEO4J_HOME/bin/neo4j-admin load --from=/path/to/source/dumpfilename.dump --database=your-database-name --force
    ```
 
-
 this implies I should also back up the character sheet and other game state data
 into the database before dumping it.
+
+
+looking into the database admin stuff, there are some learnings...
+
+here, its ~neo4j-admin database~ for the database specific commands, but doing
+~neo4j-admin --help~ can guide me through what's available
+*** DONE save all game state to the database
+CLOSED: [2024-03-25 Mon 21:22]
+*** TODO save the game to the database with some save filename
+*** TODO able to list all the save files
+*** TODO command to save the game to the database
+*** TODO load game state from database on start
+*** TODO dump the database to a file
+*** TODO load the database from a file
 ** TODO figure out how to query the database on each turn
 to provide and generate the context needed for the current turn when calling the
 LLM
@@ -114,6 +130,44 @@ or both..?
 
 the question is, what is the subject of the query? I think basically i need to consider who should know what. What should the player know? what should the relevan nearby npcs know? what does the DM need to know?
 These answers will probably reveal themselves under more playtesting.
+
+I probably need to craft a prompt that would generate a query or something, or at least a starter node or nodes...
+
+thinking about this more, i think the solution si vector search.
+
+User input -> vectorize -> query for top-k related nodes -> follow the relationships out 1 deep -> provide that as context in the prompt
+
+this will need some tweaking:
++ what is optimal top-k?
++ perhaps not only outward relationships
++ maybe need to go 2 deep or more
+etc
+** TODO streaming responses
+this is tricky because there are some processes that depend on the LLM response and if the response is streaming, none of those can run until the stream is complete.
+However, with concurrent processing i think this is possible:
+
+#+begin_src plantuml
+actor player
+database neo4j
+entity  g
+entity openai
+
+player -> g: player action
+g -> openai: extract entities/subjects
+openai --> g: response
+g -> neo4j: query knowledge graph
+neo4j --> g: response
+note over g: craft prompt
+g -> openai: prompt
+openai --> g: response
+g --> player: stream tokens in
+g -> openai: extract entities
+openai --> g: entities
+g -> openai: get embeddings of entities
+openai --> g: embeddings
+g -> neo4j: insert embeddings and entities
+#+end_src
+
 ** TODO make updating world state asynchronous
 user types their input, new turn is evaluated and the LLM responds with the
 result of the user's action.
@@ -124,8 +178,6 @@ the graph db.
 
 I want to make the above process async, since it shouldn't block the user from
 taking their next action.
-** TODO accept and parse commands
-if input is something like ~/exit~, they can quit
 ** TODO have some kind of prompt before user input
 at least a ~>~ or something
 ** TODO add tests
