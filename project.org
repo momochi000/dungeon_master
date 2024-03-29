@@ -115,9 +115,10 @@ here, its ~neo4j-admin database~ for the database specific commands, but doing
 ~neo4j-admin --help~ can guide me through what's available
 *** DONE save all game state to the database
 CLOSED: [2024-03-25 Mon 21:22]
-*** TODO save the game to the database with some save filename
-*** TODO able to list all the save files
-*** TODO command to save the game to the database
+*** DONE save the game to the database with some save filename
+CLOSED: [2024-03-28 Thu 17:22]
+*** DONE command to save the game to the database
+CLOSED: [2024-03-28 Thu 17:22]
 *** TODO load game state from database on start
 *** TODO dump the database to a file
 *** TODO load the database from a file
@@ -142,6 +143,7 @@ this will need some tweaking:
 + perhaps not only outward relationships
 + maybe need to go 2 deep or more
 etc
+** TODO able to list all the save files
 ** TODO streaming responses
 this is tricky because there are some processes that depend on the LLM response and if the response is streaming, none of those can run until the stream is complete.
 However, with concurrent processing i think this is possible:

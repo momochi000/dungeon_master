@@ -13,13 +13,16 @@
 
 (defn save-state
   "dump the current game state into the database for reload later"
-  [game-state]
+  [game-state save-file-name]
   (with-open [driver (GraphDatabase/driver database-url (AuthTokens/none))]
     (with-open [session (.session driver)]
       (let [json-string (json/generate-string game-state)
-            cypher-string "CREATE (gs:GameState {data: $data})"]
+            cypher-string "CREATE (gs:GameState {data: $data, save_file_name: $filename})"]
 
-        (run-cypher-stmt-with-data-no-return cypher-string {"data" json-string} session)
+        (run-cypher-stmt-with-data-no-return
+          cypher-string
+          {"data" json-string "filename" save-file-name}
+          session)
         ))))
 
 (defn load-state

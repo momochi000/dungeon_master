@@ -19,15 +19,20 @@
   (->GameState :normal {} [] (build-blank-char-sheet "Coran")))
 
 
-(defn to-plain-map
-  [game-state]
-  (select-keys game-state [:mode :world-state :interaction-history :player-sheet]))
+;; Deprecated
+;; Doesn't look like this is needed. i believe clojure can treat records like plain maps wherever they're used as such
+;;(defn to-plain-map
+;;  [game-state]
+;;  (select-keys game-state [:mode :world-state :interaction-history :player-sheet]))
 
 (defn save-game-state
   "Save the game state to the database so that it can be loaded later
   also clear the previous state"
-  [game-state]
-  (save-state game-state))
+  ([game-state]
+   (save-state game-state "autosave"))
+
+  ([game-state save-file-name]
+   (save-state game-state save-file-name)))
 
 (defn load-game-state
   []

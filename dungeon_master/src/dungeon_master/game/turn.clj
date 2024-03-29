@@ -77,4 +77,3 @@
 
 ;;(test-game-state)
 ;;(run-turn (test-game-state) "I lean back in my chair and take a sip of my mead. Lord Dhelt, you've done yourself a great service coming in here today and meeting me. Please, ease your burdens some and tell me more about these 'delicate matters'.")
-
