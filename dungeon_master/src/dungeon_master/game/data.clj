@@ -38,4 +38,4 @@
   (insert-test-world-state (json/parse-string fixture-json-string))
   ;; return the dummy game state
   (println "DEBUG: initialize-strawman-state: returning the dummy game state")
-  (test-game-state))
+  test-game-state)
