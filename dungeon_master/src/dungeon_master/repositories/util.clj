@@ -8,7 +8,6 @@
 (defn clear-db
   "delete all the entities and relationships in the database, never use this in production..."
   []
-  (println "DEBUG: in clear-db database-url is" database-url)
   (let [cypher-string "MATCH (n) DETACH DELETE n" ]
     (with-open [driver (GraphDatabase/driver database-url (AuthTokens/none))]
       (with-open [session (.session driver)]
@@ -18,7 +17,15 @@
                                                           (.run tx cypher-string)]
                                                       "success"))))))))
 
-;; TODO: distinguish reads from writes
+;; There are some core functionality that I want to expose to run queries:
+;; Inserting data
+;; Reading data
+;;    without params
+;;    with params
+;;    returning one result
+;;    returning multiple results
+;; these are multiplicative so there are 4 combinations
+
 (defn run-cypher-stmt-with-data
   "Run a cypher statement along with data to fill cypher placeholders
   Data is a map with strings a keys which correspond to the placeholders in cypher"
@@ -33,7 +40,7 @@
                                          node-data)]
                                (.single result))))))
 
-(defn run-cypher-stmt
+(defn run-cypher-read-one-result-no-params
   [cypher-statement driver-session]
   (.readTransaction
     driver-session
@@ -42,6 +49,18 @@
                                    (.run tx
                                          cypher-statement)]
                                (.single result)))))
+  )
+
+(defn run-cypher-read-many-results-with-params
+  [cypher-statement params driver-session]
+  (.readTransaction
+    driver-session
+    (reify TransactionWork (execute [this tx]
+                             (let [result
+                                   (.run tx
+                                         cypher-statement
+                                         params)]
+                               (.list result)))))
   )
 
 (defn run-cypher-stmt-with-data-no-return

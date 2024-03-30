@@ -125,7 +125,7 @@
   (let [[destructured-command args] command]
     (case destructured-command
       :quit-game (
-                  (save-game game-state)
+                  ;;(save-game game-state)
                   (quit-game))
       :save-game (if args
                    (save-game args game-state)

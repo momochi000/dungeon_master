@@ -37,9 +37,15 @@
 (defn load-game-state
   []
   (let [game-state (load-state)]
-    (map->GameState game-state)))
+    (if game-state
+      (map->GameState game-state)
+      nil)))
 
 ;; TESTING SECTION
+;;(require '[dungeon-master.game.data.character-sheet :refer [build-blank-char-sheet]]
+;;          '[dungeon-master.repositories.game-state :refer [save-state load-state]]
+;;          :reload )
+;;(load-game-state)
 
 ;;(defrecord Person [first-name last-name])
 ;;(def john

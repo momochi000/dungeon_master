@@ -143,6 +143,19 @@ this will need some tweaking:
 + perhaps not only outward relationships
 + maybe need to go 2 deep or more
 etc
+** TODO make the game state include the world setting info/prompt etc
+** TODO make updating world state asynchronous
+user types their input, new turn is evaluated and the LLM responds with the
+result of the user's action.
+
+The LLM output is then examined by another LLM call so that entities and
+relationships may be extracted. These entities and relationships are added to
+the graph db.
+
+I want to make the above process async, since it shouldn't block the user from
+taking their next action.
+** TODO have some kind of prompt before user input
+at least a ~>~ or something
 ** TODO able to list all the save files
 ** TODO streaming responses
 this is tricky because there are some processes that depend on the LLM response and if the response is streaming, none of those can run until the stream is complete.
@@ -169,19 +182,6 @@ g -> openai: get embeddings of entities
 openai --> g: embeddings
 g -> neo4j: insert embeddings and entities
 #+end_src
-
-** TODO make updating world state asynchronous
-user types their input, new turn is evaluated and the LLM responds with the
-result of the user's action.
-
-The LLM output is then examined by another LLM call so that entities and
-relationships may be extracted. These entities and relationships are added to
-the graph db.
-
-I want to make the above process async, since it shouldn't block the user from
-taking their next action.
-** TODO have some kind of prompt before user input
-at least a ~>~ or something
 ** TODO add tests
 what sorts of tests? I need to think and design them. This will also inform how
 I should restructure my code.

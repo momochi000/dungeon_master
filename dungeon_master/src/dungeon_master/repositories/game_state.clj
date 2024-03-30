@@ -5,11 +5,10 @@
             [dungeon-master.config :refer [database-url]]
             [dungeon-master.repositories.util :refer [create-node
                                                       create-relationship-statement
-                                                      run-cypher-stmt
+                                                      run-cypher-read-many-results-with-params
                                                       run-cypher-stmt-with-data
                                                       run-cypher-stmt-with-data-no-return]]
-            ))
-
+           ))
 
 (defn save-state
   "dump the current game state into the database for reload later"
@@ -26,19 +25,34 @@
         ))))
 
 (defn load-state
-  "load the game state from the database" []
-  (with-open [driver (GraphDatabase/driver database-url (AuthTokens/none))]
-    (with-open [session (.session driver)]
-      (let [cypher-string "MATCH (gamestate:GameState) RETURN gamestate.data"
-            cypher-result (run-cypher-stmt cypher-string session)
-            game-state-json (.asString (.get cypher-result "gamestate.data"))]
+  "load the game state from the database"
+  ([]
+   (load-state "autosave"))
 
-        (json/parse-string game-state-json true)
-        ))))
+  ([save-file-name]
+
+   (with-open [driver (GraphDatabase/driver database-url (AuthTokens/none))]
+     (with-open [session (.session driver)]
+       (let [cypher-string "MATCH (gamestate:GameState {save_file_name: $filename}) RETURN gamestate.data"
+             cypher-result (run-cypher-read-many-results-with-params cypher-string {"filename" save-file-name} session)
+             ]
+         (if (empty? cypher-result)
+           nil
+           ;;TODO: Extract this part into a separate private function
+           (json/parse-string
+             (->
+               (run-cypher-read-many-results-with-params cypher-string {"filename" save-file-name} session)
+               (first)
+               (.get "gamestate.data") ;; remember the first argument is between .get and "gamestate.data"
+               (.asString))
+
+             true))
+         )))))
 
 
 ;; For testing
 
+;;(load-state)
 
 ;;(import '[org.neo4j.driver GraphDatabase]
 ;;        '[org.neo4j.driver AuthTokens]
@@ -48,10 +62,12 @@
 ;;(require '[cheshire.core :as json])
 ;;(require '[dungeon-master.config :refer [database-url]]
 ;;         '[dungeon-master.repositories.util :refer [create-node
-;;                                                      create-relationship-statement
-;;                                                      run-cypher-stmt
-;;                                                      run-cypher-stmt-with-data
-;;                                                      run-cypher-stmt-with-data-no-return]]
+;;                                                    create-relationship-statement
+;;                                                    run-cypher-read-many-results-with-params
+;;                                                    run-cypher-read-no-params
+;;                                                    run-cypher-stmt-with-data
+;;                                                    run-cypher-stmt-with-data-no-return]]
+;;         :reload
 ;;         )
 
 ;;(require '[dungeon-master.fixtures.test-world-state :refer [test-game-state]])
@@ -74,14 +90,14 @@
 ;;  (with-open [driver (GraphDatabase/driver database-url (AuthTokens/none))]
 ;;    (with-open [session (.session driver)]
 ;;      (let [cypher-string "MATCH (gamestate:GameState) RETURN gamestate.data"
-;;            run-cypher-stmt (.readTransaction
+;;            run-cypher-read-no-params (.readTransaction
 ;;                              session
 ;;                              (reify TransactionWork (execute [this tx]
 ;;                                                       (let [result
 ;;                                                             (.run tx
 ;;                                                                   cypher-string)]
 ;;                                                         (.single result)))))
-;;            game-state-json run-cypher-stmt]
+;;            game-state-json run-cypher-read-no-params]
 ;;
 ;;        (println "DEBUG: game-state-json class is --> " (class game-state-json))
 ;;        (println "DEBUG: game-state-json is --> " game-state-json)
