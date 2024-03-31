@@ -81,7 +81,8 @@ if user just hits enter, don't execute a turn.
 ** DONE accept and parse commands
 CLOSED: [2024-03-25 Mon 21:23]
 if input is something like ~/exit~, they can quit
-** TODO ability to save and load the game
+** DONE ability to save and load the game
+CLOSED: [2024-03-29 Fri 17:30]
 this implies that i can somehow keep graphs separate. How do I like index a
 "game world" such that queries in one cannot ever cross over into queries of
 another? i suppose that'd be a form of partitioning.
@@ -119,9 +120,10 @@ CLOSED: [2024-03-25 Mon 21:22]
 CLOSED: [2024-03-28 Thu 17:22]
 *** DONE command to save the game to the database
 CLOSED: [2024-03-28 Thu 17:22]
-*** TODO load game state from database on start
-*** TODO dump the database to a file
-*** TODO load the database from a file
+*** DONE load game state from database on start
+CLOSED: [2024-03-29 Fri 17:30]
+** TODO dump the database to a file
+** TODO load the database from a file
 ** TODO figure out how to query the database on each turn
 to provide and generate the context needed for the current turn when calling the
 LLM
@@ -143,6 +145,16 @@ this will need some tweaking:
 + perhaps not only outward relationships
 + maybe need to go 2 deep or more
 etc
+*** DONE utilize and implement vector storage on neo4j
+CLOSED: [2024-03-30 Sat 19:27]
+*** DONE able to get embeddings from text
+CLOSED: [2024-03-30 Sat 19:27]
+*** DONE able to query neo4j vector store
+CLOSED: [2024-03-30 Sat 19:27]
+*** TODO create a migration which is repeatable
+*** TODO create workflow to query the db based on user input
+*** TODO add this workflow each turn
+*** TODO include relevant knowledge from the graph into the turn prompt
 ** TODO make the game state include the world setting info/prompt etc
 ** TODO make updating world state asynchronous
 user types their input, new turn is evaluated and the LLM responds with the

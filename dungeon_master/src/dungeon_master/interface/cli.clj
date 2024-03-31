@@ -40,15 +40,10 @@
 ;; TODO: make this actually save the game to different save "files"
 (defn save-game
   ([game-state]
-   (save-game-state game-state)
-   ;;(println "DEBUG: save game called with just the game state -----> " game-state)
-   )
+   (save-game-state game-state))
+
   ([save-name game-state]
-   (save-game-state game-state save-name)
-   ;;(println "DEBUG: save game called with a filename-----> " save-name)
-   ;;(println "DEBUG: also called with game state ============> " game-state)
-   )
-  )
+   (save-game-state game-state save-name)))
 
 (defn test-command []
   (println "TEST COMMAND RECEIVED")
@@ -81,42 +76,6 @@
     matched-command
   ))
 
-;; Rethinking this, i'm not sure this is the right structure.
-;; because each command may take different arguments or no arguments, i think i should
-;; separate identifying what to do and args from the command from actually selecting
-;; and executing the command
-;;(defn parse-user-command
-;;  "handle non-game command input. Things like exit game or print debug info
-;;  if the input matches some command, then return the command
-;;  if the command has arguments, then return a vector of the command and args
-;;  if the input didn't match any command, then return nil"
-;;  [user-command]
-;;  (let [command-list [[#"^/exit" quit-game]
-;;                       [#"^/quit" quit-game]
-;;                       [#"^/save (\w+)$" save-game]
-;;                       [#"^/save" save-game]
-;;                       [#"^$" ignore-command]
-;;                       [#"^/debug" test-command]]
-;;        matched-command (some
-;;                          (fn [[command-regex action-function]]
-;;                            (let [match-result (re-find command-regex user-command)]
-;;                              (when match-result
-;;                                (if (string? match-result)
-;;                                  [action-function]
-;;                                  [action-function match-result])
-;;                                )))
-;;                            command-list)]
-;;
-;;    (if matched-command
-;;      (let [[command args] matched-command]
-;;        (if args
-;;          [command (rest args)]
-;;          command))
-;;      nil)))
-
-;;(parse-user-command "hobos")
-;;(parse-user-command "/save")
-;;(parse-user-command "/save foo")
 (defn exec-user-command
   "Takes a command and optional arguments along with the game state
   and runs the command with arguments"

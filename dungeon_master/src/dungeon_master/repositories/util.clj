@@ -84,10 +84,12 @@
   ;; interpolating into raw database command is risky
   (let [cypher-string
         (str
-          "MERGE (p:"
+          "MERGE (p:KnowledgeObject:"
           (node-data "label")
           "{name_id: $id}) ON CREATE SET p.name = $name, p.description = $description RETURN (p)" )
         ]
+
+    (println "DEBUG: in create-node, the cypher string is ----> " cypher-string)
     (run-cypher-stmt-with-data cypher-string node-data driver-session))
 
   ;;(case (node-data "label")
@@ -107,3 +109,24 @@
 
     [cypher-stmt cypher-params]))
 
+
+
+;; TESTING SECTION
+
+(import '[org.neo4j.driver GraphDatabase]
+        '[org.neo4j.driver AuthTokens]
+        '[org.neo4j.driver TransactionWork])
+(require '[dungeon-master.config :refer [database-url]])
+
+(defn test-create-person-node
+  "a simple copy of world-state.test-create-person-node. This is used for convenient debugging"
+  [node-data]
+
+  (with-open [driver (GraphDatabase/driver database-url (AuthTokens/none))]
+    (with-open [session (.session driver)]
+
+      (let [cypher-string "MERGE (p:Person:KnowledgeObject {name_id: $id}) ON CREATE SET p.name = $name, p.description = $description RETURN (p)"]
+        (run-cypher-stmt-with-data cypher-string node-data session)))
+  ))
+
+(test-create-person-node {"id" "dunkey1235" "name" "sir dunkmore" "description" "a test person node"})
