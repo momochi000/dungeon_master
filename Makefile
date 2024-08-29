@@ -6,6 +6,7 @@ DUNGEON_APP=docker-compose run --rm dungeon
 repl:
 	$(DUNGEON_APP) lein repl :start :host 0.0.0.0 :port 61799
 
+# Connect my editor to this via conjure
 nix-repl:
 	nix-shell --command "cd dungeon_master; lein repl :start :port 61799"
 
