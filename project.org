@@ -122,8 +122,6 @@ CLOSED: [2024-03-28 Thu 17:22]
 CLOSED: [2024-03-28 Thu 17:22]
 *** DONE load game state from database on start
 CLOSED: [2024-03-29 Fri 17:30]
-** TODO dump the database to a file
-** TODO load the database from a file
 ** TODO figure out how to query the database on each turn
 to provide and generate the context needed for the current turn when calling the
 LLM
@@ -151,10 +149,25 @@ CLOSED: [2024-03-30 Sat 19:27]
 CLOSED: [2024-03-30 Sat 19:27]
 *** DONE able to query neo4j vector store
 CLOSED: [2024-03-30 Sat 19:27]
-*** TODO create a migration which is repeatable
+*** TODO fix usages of get-embedding
+i changed it to return some map of values including the embedding rather than
+just the embedding itself. make this work
+
+this is an example of weak-typing biting me. The compiler/tooling would have
+warned me about this being broken.
+*** TODO Test that i can query for a vector using a label other than KnowlegeObject
+vectors are associated with the KnowledgeObject label by the index, i want to
+see if i can also query with otehr labels (e.g. Person) so long as the node also
+has KnowledgeObject on it.
+*** TODO return vector results along with their similarity scores
+*** TODO cut off vector search results under some threshold.
+i need to get the value of the similarity result as well
 *** TODO create workflow to query the db based on user input
 *** TODO add this workflow each turn
 *** TODO include relevant knowledge from the graph into the turn prompt
+** TODO dump the database to a file
+** TODO load the database from a file
+** TODO create a migration which is repeatable
 ** TODO make the game state include the world setting info/prompt etc
 ** TODO make updating world state asynchronous
 user types their input, new turn is evaluated and the LLM responds with the
@@ -289,3 +302,75 @@ neo4j begins with 2 databases:
 *** documentation
 **** bolt driver wiki
 https://github.com/neo4j/neo4j-java-driver/wiki
+* Design notes
+** game flow
+#+begin_src plantuml
+actor player
+database neo4j
+entity  game
+entity openai
+
+player -> game: player action
+game -> openai: extract entities/subjects
+openai --> game: response
+game -> neo4j: query knowledge graph
+neo4j --> game: response
+note over game: craft prompt
+game -> openai: prompt
+openai --> game: response
+game --> player: stream tokens in
+game -> openai: extract entities
+openai --> game: entities
+game -> openai: get embeddings of entities
+openai --> game: embeddings
+game -> neo4j: insert embeddings and entities
+#+end_src
+
+#+RESULTS:
+[[file:/var/folders/1z/kslvzgr51r94tky1f_k929200000gn/T/babel-4WgUmR/plantuml-ZTk4ZM.png]]
+
+** querying for world knowledge
+I'm thinking of a number of ways to do this and it will take some evaluation and
+playtesting to figure out what works best. For now keep track of the different
+methods and findings.
+
+*** get embeddings from entities
+When the user takes their action, use LLM to extract entities from that. Get the
+vectors from those entities, then use those vectors to search database.
+
+the premise is if player mentions <subject1>,<subject2>,..<subjectn>, we'll get precisely those entities, then hopefully find those nodes in the database more accurately using similarity search
+#+begin_src plantuml
+actor player
+database neo4j
+entity game
+entity openai
+
+game --> player: prompt for input
+player -> game: player action
+game -> openai: extract entities from player input
+openai --> game: response
+game -> openai: get vectors from entities
+openai --> game: response
+game -> neo4j: vector query using embeddings
+neo4j --> game: response
+note over game: craft prompt
+game -> openai: prompt for current game turn
+#+end_src
+*** vector search over player input
+This is a more simple approach, eliminating one back and forth call to the LLM.
+It may be that extracting entities first is overkill, and this will work fine.
+#+begin_src plantuml
+actor player
+database neo4j
+entity game
+entity openai
+
+game --> player: prompt for input
+player -> game: player action
+game -> openai: get vectors from player action
+openai --> game: response
+game -> neo4j: vector query using embeddings
+neo4j --> game: response
+note over game: craft prompt
+game -> openai: prompt for current game turn
+#+end_src
