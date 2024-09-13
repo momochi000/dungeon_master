@@ -1,4 +1,4 @@
-DUNGEON_APP=docker-compose run --rm dungeon
+DUNGEON_APP=docker compose run --rm dungeon
 
 .PHONY: build repl nix-repl dungeon-shell tests run play db-backup
 
@@ -17,12 +17,12 @@ tests:
 	$(DUNGEON_APP) lein test
 
 run:
-	docker-compose up
+	docker compose up
 
 play:
 	$(DUNGEON_APP) lein run
 
 # This can only be run when the database is not running
 db-backup:
-	docker-compose run --rm graphdb mkdir -p /var/lib/neo4j/data/backups
-	docker-compose run --rm graphdb neo4j-admin database dump --to-path=./data/backups/ neo4j
+	docker compose run --rm graphdb mkdir -p /var/lib/neo4j/data/backups
+	docker compose run --rm graphdb neo4j-admin database dump --to-path=./data/backups/ neo4j
