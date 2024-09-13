@@ -9,3 +9,7 @@ neo4j
 
 # folder for temporary junk used during development
 dev
+
+# language server
+.clj-kondo
+.lsp
