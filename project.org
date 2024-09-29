@@ -149,22 +149,24 @@ CLOSED: [2024-03-30 Sat 19:27]
 CLOSED: [2024-03-30 Sat 19:27]
 *** DONE able to query neo4j vector store
 CLOSED: [2024-03-30 Sat 19:27]
-*** TODO fix usages of get-embedding
+*** DONE fix usages of get-embedding
+CLOSED: [2024-09-28 Sat 17:41]
 i changed it to return some map of values including the embedding rather than
 just the embedding itself. make this work
 
 this is an example of weak-typing biting me. The compiler/tooling would have
 warned me about this being broken.
-*** TODO Test that i can query for a vector using a label other than KnowlegeObject
+*** DONE Test that i can query for a vector using a label other than KnowlegeObject
+CLOSED: [2024-09-28 Sat 17:41]
 vectors are associated with the KnowledgeObject label by the index, i want to
 see if i can also query with otehr labels (e.g. Person) so long as the node also
 has KnowledgeObject on it.
-*** TODO return vector results along with their similarity scores
-*** TODO cut off vector search results under some threshold.
-i need to get the value of the similarity result as well
+*** DONE return vector results along with their similarity scores
+CLOSED: [2024-09-28 Sat 17:41]
 *** TODO create workflow to query the db based on user input
 *** TODO add this workflow each turn
 *** TODO include relevant knowledge from the graph into the turn prompt
+*** TODO on creation of new nodes, also insert their embeddings
 ** TODO dump the database to a file
 ** TODO load the database from a file
 ** TODO create a migration which is repeatable
