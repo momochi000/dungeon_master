@@ -30,6 +30,7 @@
                              (initialize-strawman-state)) ]
 
     (println "The story left off.....")
+
     ;; print out the last system prompt
     (println (get-last-message initial-game-state))
 

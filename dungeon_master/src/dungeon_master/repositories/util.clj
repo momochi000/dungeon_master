@@ -21,10 +21,11 @@
 ;; Inserting data
 ;; Reading data
 ;;    without params
+;;      returning one result
+;;      returning multiple results
 ;;    with params
-;;    returning one result
-;;    returning multiple results
-;; these are multiplicative so there are 4 combinations
+;;      returning one result
+;;      returning multiple results
 
 (defn run-cypher-stmt-with-data
   "Run a cypher statement along with data to fill cypher placeholders
@@ -34,10 +35,13 @@
   (.writeTransaction
     driver-session
     (reify TransactionWork (execute [this tx]
+                             ;;(println "DEBUG: run-cypher-stmt-with-data inside transactionwork")
+                             ;;(println "DEBUG: run-cypher-stmt-with-data node-data is ----> " node-data)
                              (let [result
                                    (.run tx
                                          cypher-statement
                                          node-data)]
+                               ;(println "DEBUG: run-cypher-stmt-with-data result :  " result)
                                (.single result))))))
 
 (defn run-cypher-read-one-result-no-params
