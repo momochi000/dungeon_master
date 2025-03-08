@@ -1,6 +1,6 @@
 (ns dungeon-master.config
   ;;(:require [environ.core :refer [env]])
-  (:require '[dotenv :refer [env app-env]]))
+  (:require [dotenv :refer [env app-env]]))
 
 (def database-url
   (env "DATABASE_URL"))
