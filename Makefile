@@ -10,6 +10,10 @@ repl:
 nrepl:
 	nix-shell --command "$(DUNGEON_FOLDER) clj -M:nREPL -m nrepl.cmdline"
 
+run:
+	nix-shell --command "$(DUNGEON_FOLDER) clj -X dungeon-master.core/-main"
+
+
 # DEPRECATED
 #   Keeping this around for documentation on how to use leiningen
 #   but going forward i don't want to use leiningen anymore

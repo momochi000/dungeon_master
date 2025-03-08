@@ -9,6 +9,7 @@ The project is heavily under development and at the moment the only thing you ca
 
 I'm using clojure's tools.build to build the app, transitioning away from leiningen that I used before. As such, the below instructions are in the process of being deprecated.
 
+
 ### clojure nix environment
 I'm leveraging nix to have access to clojure so that it doesn't need to be installed on the host machine. There's a provided shell.nix file that has what you need.
 
@@ -25,6 +26,15 @@ leveraging the `build.clj` file
 ### neo4j database
 This is run from a separate docker container. To make this easier, there is a provided docker-compose file. Simply run `docker-compose up`. It will expose the necessary ports
 
+### Running
+To run the main function (which includes the main game loop), first run
+`docker-compose up`
+which starts the neo4j database
+
+then run
+`clj -X dungeon-master.core/-main`
+from inside the nix-shell
+There is also a make command for convenience
 
 ### Old
 
