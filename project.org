@@ -122,6 +122,21 @@ CLOSED: [2024-03-28 Thu 17:22]
 CLOSED: [2024-03-28 Thu 17:22]
 *** DONE load game state from database on start
 CLOSED: [2024-03-29 Fri 17:30]
+** TODO Convert from leiningen to tools.build
+*** DONE able to run the repl
+CLOSED: [2025-03-07 Fri 15:33]
+*** DONE able to run the nrepl
+CLOSED: [2025-03-07 Fri 15:23]
+*** DONE handle environment configs
+CLOSED: [2025-03-07 Fri 15:23]
+open ai key
+database connection configs etc
+
+leiningen used =profiles= for this stuff, but id like to get away from this
+*** DONE able to call openai
+CLOSED: [2025-03-07 Fri 16:06]
+this depends on OPENAI_API_KEY being present as env var
+*** TODO able to run the app
 ** TODO figure out how to query the database on each turn
 to provide and generate the context needed for the current turn when calling the
 LLM
@@ -167,6 +182,7 @@ CLOSED: [2024-09-28 Sat 17:41]
 *** TODO add this workflow each turn
 *** TODO include relevant knowledge from the graph into the turn prompt
 *** TODO on creation of new nodes, also insert their embeddings
+** TODO add pretty printing
 ** TODO dump the database to a file
 ** TODO load the database from a file
 ** TODO create a migration which is repeatable

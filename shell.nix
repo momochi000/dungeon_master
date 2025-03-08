@@ -5,7 +5,7 @@ pkgs.mkShell {
     #pkgs.jdk21
     pkgs.jdk
     pkgs.clojure
-    pkgs.leiningen
+    #pkgs.leiningen
     #pkgs.boot
   ];
 }

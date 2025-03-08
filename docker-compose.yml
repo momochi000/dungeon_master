@@ -1,20 +1,20 @@
 version: '3'
 services:
-  dungeon:
-    build:
-      context: .
-    volumes:
-      - ./dungeon_master:/app/
-    environment:
-      - OPENAI_API_KEY=$OPENAI_API_KEY
-      - DATABASE_URL=bolt://graphdb:7687
-    ports:
-      - "61799:61799"
-    tty: true
-    stdin_open: true
-    depends_on:
-      - "graphdb"
-        #    command: "lein run"
+  #dungeon:
+  #  build:
+  #    context: .
+  #  volumes:
+  #    - ./dungeon_master:/app/
+  #  environment:
+  #    - OPENAI_API_KEY=$OPENAI_API_KEY
+  #    - DATABASE_URL=bolt://graphdb:7687
+  #  ports:
+  #    - "61799:61799"
+  #  tty: true
+  #  stdin_open: true
+  #  depends_on:
+  #    - "graphdb"
+  #      #    command: "lein run"
 
   graphdb:
     image: docker.io/neo4j

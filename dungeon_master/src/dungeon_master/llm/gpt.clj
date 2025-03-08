@@ -1,6 +1,7 @@
 (ns dungeon-master.llm.gpt
   (:require [wkok.openai-clojure.api :as api]
             [dungeon-master.util :refer [last-n-elements]]
+            [dungeon-master.config :refer [openai-api-key]]
             ))
 
 (def default-model "gpt-3.5-turbo")
@@ -86,8 +87,12 @@ Please ensure the output is valid json")
   "accepts a sequence/list of messages each of which is the form:
   {:role \"user|assistant\" :content \"content of the message\"}"
   [messages]
-  (api/create-chat-completion {:model default-model
-                               :messages messages }))
+  (
+   ;;(println openai-api-key)
+   api/create-chat-completion {:model default-model
+                               ;;:organization openai-organization
+                               :messages messages }
+                               {:api-key openai-api-key}))
 
 (defn run-function-completion
   [messages function-type]
@@ -96,7 +101,8 @@ Please ensure the output is valid json")
                                                    :messages messages
                                                    :tools [extract-entities-tool]
                                                    :tool-choice { :type "function"
-                                                                 :function { :name "extract_entities"}}})
+                                                                 :function { :name "extract_entities"}}}
+                                                  {:api-key openai-api-key})
     "error, invalid function type"
     )
   )
@@ -125,10 +131,9 @@ Please ensure the output is valid json")
 
 
 
-
-
 ;; TESTING SECTION
 ;;(require '[wkok.openai-clojure.api :as api])
+;;(require '[dungeon-master.config :refer [openai-api-key]])
 ;;
 ;;(test-user-action "I enter the run-down tavern")
 ;;(def gpt-result (test-user-action "I enter the run-down tavern"))
@@ -141,3 +146,11 @@ Please ensure the output is valid json")
 ;;  (let [test-messages [{:role "system" :content "some generic prompt"}
 ;;                         {:role "user" :content user-input} ]]
 ;;    (run-completion test-messages)))
+;;(format openai-api-key)
+;;(format openai-organization)
+;;
+;;(require '[dotenv :refer [env app-env]])
+;;(def openai-api-key
+;;  (env "OPENAI_API_KEY"))
+;;(def openai-organization
+;;  (env "OPENAI_ORGANIZATION"))
