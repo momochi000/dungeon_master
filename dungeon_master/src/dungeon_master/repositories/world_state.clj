@@ -9,6 +9,11 @@
             [cheshire.core :as json]))
 
 
+;; NOTE: Using declare here because clojure must define functions in the order
+;; in which they're used. However, this function is supposed to be private. It
+;; feels weird to have private functions declared BEFORE public ones, but
+;; that's the way it's supposed to be in clojure. I did this to get around
+;; that, but i don't believe it is idiomatic clojure (or lisp)
 (declare create-relationship-from-string)
 
 

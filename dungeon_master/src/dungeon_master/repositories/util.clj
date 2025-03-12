@@ -85,16 +85,23 @@
 
   ;; This is a bit iffy. It's interpolating the label key of node-data into the query.
   ;; I should implement some controls on what can be passed in here as node types
-  ;; interpolating into raw database command is risky
-  (let [cypher-string
+  ;; interpolating into raw database command is risky.
+  ;; The reason for this was labels cannot be passed in as params like node attributes can
+  (let [sanitized-node-data (merge {"name" nil "description" nil} node-data)
+
+        cypher-string
         (str
           "MERGE (p:KnowledgeObject:"
           (node-data "label")
-          "{name_id: $id}) ON CREATE SET p.name = $name, p.description = $description RETURN (p)" )
+          "{name_id: $id})"
+          "  ON CREATE SET p.name = COALESCE($name, p.name), "
+          "  p.description = COALESCE($description, p.description)"
+          "RETURN (p)" )
         ]
 
+    (println "DEBUG: in create-node, sanitized-node-data is ----> " sanitized-node-data)
     (println "DEBUG: in create-node, the cypher string is ----> " cypher-string)
-    (run-cypher-stmt-with-data cypher-string node-data driver-session))
+    (run-cypher-stmt-with-data cypher-string sanitized-node-data driver-session))
 
   ;;(case (node-data "label")
   ;;  "Place" (create-place-node node-data driver-session)
