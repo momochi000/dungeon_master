@@ -122,7 +122,8 @@ CLOSED: [2024-03-28 Thu 17:22]
 CLOSED: [2024-03-28 Thu 17:22]
 *** DONE load game state from database on start
 CLOSED: [2024-03-29 Fri 17:30]
-** TODO Convert from leiningen to tools.build
+** DONE Convert from leiningen to tools.build
+CLOSED: [2025-03-07 Fri 17:30]
 *** DONE able to run the repl
 CLOSED: [2025-03-07 Fri 15:33]
 *** DONE able to run the nrepl
@@ -136,7 +137,16 @@ leiningen used =profiles= for this stuff, but id like to get away from this
 *** DONE able to call openai
 CLOSED: [2025-03-07 Fri 16:06]
 this depends on OPENAI_API_KEY being present as env var
-*** TODO able to run the app
+*** DONE able to run the app
+CLOSED: [2025-03-07 Fri 17:30]
+** DONE add pretty printing
+CLOSED: [2025-03-12 Wed 11:58]
+it's built into clojure
+#+begin_src clojure
+[clojure.pprint :as p]
+
+(println (p/pprint some-nested-structure))
+#+end_src
 ** TODO figure out how to query the database on each turn
 to provide and generate the context needed for the current turn when calling the
 LLM
@@ -178,11 +188,36 @@ see if i can also query with otehr labels (e.g. Person) so long as the node also
 has KnowledgeObject on it.
 *** DONE return vector results along with their similarity scores
 CLOSED: [2024-09-28 Sat 17:41]
-*** TODO create workflow to query the db based on user input
-*** TODO add this workflow each turn
-*** TODO include relevant knowledge from the graph into the turn prompt
+*** TODO name not given :bug:
+when inserting a node, the name attribute should be optional. how do we do this in cypher/neo4j/clojure?
 *** TODO on creation of new nodes, also insert their embeddings
-** TODO add pretty printing
+*** TODO create workflow to query the db based on user input
+*** TODO include relevant knowledge from the graph into the turn prompt
+*** TODO add this workflow each turn
+*** TODO adjust query to take the latest knowledge
+sort by created at per each node/relation.
+i.e. if Foo AT Bar appears multiple times, take the latest one only.
+** TODO problem: how to invalidate world state?
+or how to handle contradictory information?
+i have a graph which shows an npc both at amn and at baldurs gate
+
+in this case i condsider it a bug. He /was/ at amn, but now is in baldurs gate,
+but the procedure which updates the world state inserted both though he was only
+talking about being at amn previously.
+
+however, it is very conceivable that one could be at some location and then
+later move to another location, at which point they should no longer have the
+=AT= relationship to the other place.
+
+Perhaps an entity should only be allowed a single =AT= relationship? but then
+what if there were rumors about a thing. maybe it's rumored that some artifact
+is here, there, or elsewhere, and it's actual location isn't known...?
+
+This can be solved by simply making the graph append only. We don't care about old or stale information, we'll just sort by created_at/inserted_at and take the newest. This would also have the added benefit of keeping a history of knowledge
+** TODO unexpected arguments to extract_entities :problem:
+See that the LLM returns "you" referring to the player. This is not wrong nor a hallucination, however it does present a challenge. How to solve this?
+
+ "{\"entities\":[{\"label\":\"Person\",\"id\":\"lordDhelt\",\"name\":\"Lord Dhelt\",\"description\":\"The person making a request for assistance in retrieving a valuable item for his family from a syndicate in Baldur's Gate.\"},{\"label\":\"Place\",\"id\":\"baldursGate\",\"description\":\"A city where a syndicate operates with vicious efficiency.\"},{\"label\":\"Person\",\"id\":\"you\",\"name\":\"Warrior\",\"description\":\"The person being asked to help Lord Dhelt in retrieving the valuable item.\"}],\"relationships\":[\"lordDhelt|KNOWS|you\",\"lordDhelt|AT|baldursGate\"]}"}}],
 ** TODO dump the database to a file
 ** TODO load the database from a file
 ** TODO create a migration which is repeatable
@@ -228,21 +263,6 @@ g -> neo4j: insert embeddings and entities
 ** TODO add tests
 what sorts of tests? I need to think and design them. This will also inform how
 I should restructure my code.
-** TODO problem: how to invalidate world state?
-or how to handle contradictory information?
-i have a graph which shows an npc both at amn and at baldurs gate
-
-in this case i condsider it a bug. He /was/ at amn, but now is in baldurs gate,
-but the procedure which updates the world state inserted both though he was only
-talking about being at amn previously.
-
-however, it is very conceivable that one could be at some location and then
-later move to another location, at which point they should no longer have the
-=AT= relationship to the other place.
-
-Perhaps an entity should only be allowed a single =AT= relationship? but then
-what if there were rumors about a thing. maybe it's rumored that some artifact
-is here, there, or elsewhere, and it's actual location isn't known...?
 ** TODO crash at json parse :bug:
 what a crappy error message, no insight into where in my code things went wrong
 
@@ -277,7 +297,6 @@ This has risk. Need to sanitize
 TransactionWork is deprecated in favor of TransactionCallback
 https://neo4j.com/docs/api/java-driver/current/org.neo4j.driver/org/neo4j/driver/TransactionWork.html
 ** TODO move game_state.clj under game/
-** TODO set up a beginning game state
 ** TODO playtest
 ** TODO turn the results from neo4j query into some nested map structure
 this is step 1 in an experiment. i don't know if this is the best representation
@@ -302,7 +321,6 @@ e.g. create constraints and indices
 neo4j begins with 2 databases:
 + system
   the system database described above, containing meta-data on the DBMS and security configuration.
-
 + neo4j
   the default database, named using the config option dbms.default_database=neo4j.
 *** workings
@@ -320,6 +338,9 @@ neo4j begins with 2 databases:
 *** documentation
 **** bolt driver wiki
 https://github.com/neo4j/neo4j-java-driver/wiki
+** scratch
+*** first response
+I lean back in my chair and consider his words as I take a sip from my tankard. With a grin I say "let us speak more of the skills you're looking for"
 * Design notes
 ** game flow
 #+begin_src plantuml
