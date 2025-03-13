@@ -188,7 +188,8 @@ see if i can also query with otehr labels (e.g. Person) so long as the node also
 has KnowledgeObject on it.
 *** DONE return vector results along with their similarity scores
 CLOSED: [2024-09-28 Sat 17:41]
-*** TODO name not given :bug:
+*** DONE name not given :bug:
+CLOSED: [2025-03-12 Wed 13:11]
 when inserting a node, the name attribute should be optional. how do we do this in cypher/neo4j/clojure?
 *** TODO on creation of new nodes, also insert their embeddings
 *** TODO create workflow to query the db based on user input
@@ -218,6 +219,15 @@ This can be solved by simply making the graph append only. We don't care about o
 See that the LLM returns "you" referring to the player. This is not wrong nor a hallucination, however it does present a challenge. How to solve this?
 
  "{\"entities\":[{\"label\":\"Person\",\"id\":\"lordDhelt\",\"name\":\"Lord Dhelt\",\"description\":\"The person making a request for assistance in retrieving a valuable item for his family from a syndicate in Baldur's Gate.\"},{\"label\":\"Place\",\"id\":\"baldursGate\",\"description\":\"A city where a syndicate operates with vicious efficiency.\"},{\"label\":\"Person\",\"id\":\"you\",\"name\":\"Warrior\",\"description\":\"The person being asked to help Lord Dhelt in retrieving the valuable item.\"}],\"relationships\":[\"lordDhelt|KNOWS|you\",\"lordDhelt|AT|baldursGate\"]}"}}],
+** TODO Pass entire context to extract_entities :optimization:
+~extract-entities~ needs to be refactored.
+it should take in the entire conversation history rather than just the last message
+it should also be broken down into smaller functions, one of which simply runs calls the llm
+and another wrapper function which updates the game object
+** TODO there's a double print before the user prompt :ui:problem:
+** TODO interactions with the game state should be refactored into their own library :refactor:
+all functions which read from and update the game state should go into a module
+whose responsibility is only that.
 ** TODO dump the database to a file
 ** TODO load the database from a file
 ** TODO create a migration which is repeatable
@@ -298,6 +308,10 @@ TransactionWork is deprecated in favor of TransactionCallback
 https://neo4j.com/docs/api/java-driver/current/org.neo4j.driver/org/neo4j/driver/TransactionWork.html
 ** TODO move game_state.clj under game/
 ** TODO playtest
+** TODO inserting nodes each turn should happen in a single statement :optimization:
+currently, a separate ~create-node~ call is run for each entity data that is present.
+this should really happen in a single insert statement
+this doesn't matter much at this scale, since a single game instance is dealing with a single database
 ** TODO turn the results from neo4j query into some nested map structure
 this is step 1 in an experiment. i don't know if this is the best representation
 of the graph to place in memory but the intent is to get closer to finding out.
