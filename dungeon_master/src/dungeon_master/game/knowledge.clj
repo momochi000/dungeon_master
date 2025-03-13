@@ -1,6 +1,6 @@
 (ns dungeon-master.game.knowledge
   (:require [dungeon-master.llm.embedding :refer [get-embedding]]
-             [ dungeon-master.repositories.embedding :refer [add-embedding find-knn]]))
+            [dungeon-master.repositories.embedding :refer [add-embedding find-knn]]))
 
 (defn find-k-similar-descriptions
   "Given a search string for descriptions, convert the query into an embedding
@@ -10,3 +10,11 @@
 
   (let [embedding (get-embedding query)]
     (find-knn (:embedding embedding) k)))
+
+;; TESTING SECTION
+
+;;(require '[dungeon-master.llm.embedding :refer [get-embedding]])
+;;(require '[dungeon-master.repositories.embedding :refer [find-knn]])
+;;
+;;(find-k-similar-descriptions "Cimmeria" 2)
+;;(find-k-similar-descriptions "goliath barbarian" 2)

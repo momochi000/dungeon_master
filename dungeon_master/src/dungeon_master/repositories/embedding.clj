@@ -66,15 +66,21 @@
 
 ;; TESTING SECTION
 
-(def query-output
-  (let [e (get-embedding "a test description")
-        out (find-knn-nodes-query (:embedding e) 2) ]
-    out
-    ))
-(query-result-to-node (first query-output))
-
-(def temp
-  (let [e (get-embedding "a test description")
-        out (find-knn (:embedding e) 2) ]
-    out
-    ))
+;;(import '[org.neo4j.driver GraphDatabase]
+;;           '[org.neo4j.driver AuthTokens]
+;;           '[org.neo4j.driver TransactionWork])
+;;(require '[dungeon-master.config :refer [database-url]]
+;;            '[dungeon-master.repositories.util :refer [run-cypher-stmt-with-data run-cypher-read-many-results-with-params]]
+;;            )
+;;(def query-output
+;;  (let [e (get-embedding "a test description")
+;;        out (find-knn-nodes-query (:embedding e) 2) ]
+;;    out
+;;    ))
+;;(query-result-to-node (first query-output))
+;;
+;;(def temp
+;;  (let [e (get-embedding "a test description")
+;;        out (find-knn (:embedding e) 2) ]
+;;    out
+;;    ))

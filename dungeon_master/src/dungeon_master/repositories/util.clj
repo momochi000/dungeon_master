@@ -80,6 +80,9 @@
 
 
 (defn create-node
+  "Create or update a node in the database given some data. The node is given a label of KnowledgeObject
+  as well as whatever `label` is passed in in `node-data`. The optional attributes of a node are `name`
+  and `description`. `id` is a required attribute (it becomes `name_id` on the created node"
   [node-data driver-session]
   (println "DEBUG: in create-node, node-data is ----> " node-data)
 
@@ -108,6 +111,27 @@
   ;;  "Person" (create-person-node node-data driver-session))
   )
 
+(defn create-node-with-embedding
+  "see `create-node`. This function accepts and assigns an embedding vector to the node as well"
+  [node-data driver-session]
+  (println "DEBUG: in create-node, node-data is ----> " node-data)
+  (let [sanitized-node-data (merge {"name" nil "description" nil} node-data)
+
+        cypher-string
+        (str
+          "MERGE (p:KnowledgeObject:"
+          (node-data "label")
+          "{name_id: $id})"
+          "  ON CREATE SET p.name = COALESCE($name, p.name), "
+          "  p.description = COALESCE($description, p.description), "
+          "  p.embedding = COALESCE($vector, p.description) "
+          "RETURN (p)" )
+        ]
+
+    (println "DEBUG: in create-node, sanitized-node-data is ----> " sanitized-node-data)
+    (println "DEBUG: in create-node, the cypher string is ----> " cypher-string)
+    (run-cypher-stmt-with-data cypher-string sanitized-node-data driver-session))
+  )
 (defn create-relationship-statement
   "relate two nodes with each other"
   [first-node-id relationship-type second-node-id]
