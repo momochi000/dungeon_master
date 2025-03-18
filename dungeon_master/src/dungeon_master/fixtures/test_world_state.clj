@@ -5,9 +5,9 @@
            [org.neo4j.driver TransactionWork])
   (:require [cheshire.core :as json]
             [dungeon-master.config :refer [database-url]]
-            [dungeon-master.game-state :refer [->GameState]]
+            [dungeon-master.game.state :refer [->GameState]]
             [dungeon-master.game.data.character-sheet :refer [build-blank-char-sheet]]
-            [dungeon-master.repositories.world-state :refer [create-relationship-from-string]]
+            [dungeon-master.repositories.world-state :refer [create-relationship-from-object]]
             [dungeon-master.repositories.util :refer [create-node]]
             ))
 
@@ -27,6 +27,21 @@
 ;;  (blushingMermaidTavern)-[:IN]->(baldursGate)
 
 
+;;(def fixture-json-string
+;;"{
+;;    \"entities\": [
+;;        {\"label\":\"Person\",\"id\":\"coran\",\"name\":\"Coran\",\"description\":\"The stout bartender with a ruddy face who works at the Blushing Mermaid Tavern in Baldur's Gate\"},
+;;        {\"label\":\"Person\",\"id\":\"lordDhelt\",\"name\":\"Lord Dhelt\",\"description\":\"A nobleman from Amn who is currently in the Blushing Mermaid Tavern and in need of discreet help\"},
+;;        {\"label\":\"Place\",\"id\":\"blushingMermaidTavern\",\"name\":\"Blushing Mermaid Tavern\",\"description\":\"The tavern in Baldur's Gate known for a warm atmosphere and busy clientele\"},
+;;        {\"label\":\"Place\",\"id\":\"baldursGate\",\"name\":\"Baldur's Gate\",\"description\":\"The city where the Blushing Mermaid Tavern is located and where business is always good according to Coran\"}
+;;    ],
+;;    \"relationships\": [
+;;        \"Coran|IN|BlushingMermaidTavern\",
+;;        \"LordDhelt|IN|BlushingMermaidTavern\",
+;;        \"BlushingMermaidTavern|IN|BaldursGate\"
+;;    ]
+;;}")
+
 (def fixture-json-string
 "{
     \"entities\": [
@@ -36,17 +51,18 @@
         {\"label\":\"Place\",\"id\":\"baldursGate\",\"name\":\"Baldur's Gate\",\"description\":\"The city where the Blushing Mermaid Tavern is located and where business is always good according to Coran\"}
     ],
     \"relationships\": [
-        \"coran|IN|blushingMermaidTavern\",
-        \"lordDhelt|IN|blushingMermaidTavern\",
-        \"blushingMermaidTavern|IN|baldursGate\"
+        {\"from_entity_name\": \"Coran\", \"relationship_type\": \"IN\", \"to_entity_name\": \"BlushingMermaidTavern\"},
+        {\"from_entity_name\": \"LordDhelt\", \"relationship_type\": \"IN\", \"to_entity_name\": \"BlushingMermaidTavern\"},
+        {\"from_entity_name\": \"BlushingMermaidTavern\", \"relationship_type\": \"IN\", \"to_entity_name\": \"BaldursGate\"}
     ]
 }")
 
-;;(require '[dungeon-master.game-state :refer [->GameState]])
+;;(require '[dungeon-master.game.state :refer [->GameState]])
 
 (def test-game-state
   (->GameState
     :normal
+    {}
     {}
     [
      {:role "assistant" :content "As you push open the heavy, wooden door of the Blushing Mermaid Tavern, a warm mixture of scents—roasted meats, spilt ale, and the smoky tang of a wood-burning hearth—greets you. The tavern is alive with the clamor of midday patrons: travelers swapping tales, locals enjoying their breaks, and off-duty guards seeking respite with a pint. \n\nThe tavern's interior is cozy and somewhat dimly lit, with sunlight streaming through small, high windows. A long bar runs along one wall, behind which a stout bartender with a ruddy face is vigorously polishing mugs. A scattering of wooden tables is spread throughout the common room, most occupied, though a few near the back stand empty. From a corner stage, a half-elf bard plucks a lute, adding a melodic backdrop to the hum of conversation."}
@@ -75,7 +91,7 @@
 
           (doall (map
                    (fn [relationship-data]
-                     (create-relationship-from-string relationship-data session))
+                     (create-relationship-from-object relationship-data session))
                    relationships))))))
 
 
@@ -94,8 +110,8 @@
 ;;(import '(org.neo4j.driver AuthTokens))
 ;;(import '(org.neo4j.driver Values))
 ;;(require '[cheshire.core :as json])
-;;(require '[dungeon-master.repositories.world-state :refer [create-node create-relationship-from-string]])
-;;(require '[dungeon-master.game-state :refer [->GameState]])
+;;(require '[dungeon-master.repositories.world-state :refer [create-node create-relationship-from-object]])
+;;(require '[dungeon-master.game.state :refer [->GameState]])
 ;;(require '[dungeon-master.game.data.character-sheet :refer [build-blank-char-sheet]])
 
 ;;(insert-test-world-state (json/parse-string fixture-json-string))
@@ -106,7 +122,7 @@
 ;;  []
 ;;  (with-open [driver (GraphDatabase/driver "bolt://localhost:7687" (AuthTokens/none))]
 ;;      (with-open [session (.session driver)]
-;;        (create-relationship-from-string  "coran|IN|blushingMermaidTavern" session))))
+;;        (create-relationship-from-object  "coran|IN|blushingMermaidTavern" session))))
 
 ;; From within the compose cluster, use graphdb as the hostname of the neo4j instance
 ;; but running in my repl, i can access it as localhost

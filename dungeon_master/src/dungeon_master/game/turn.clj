@@ -6,36 +6,80 @@
                                     generate-system-prompt]]
     [dungeon-master.game.data :refer [extract-entities]]
     [dungeon-master.game.prompt :refer [generate-dm-prompts]]
+    [dungeon-master.game.state :refer [add-user-input-to-interaction-history
+                                       add-user-input-to-working-memory
+                                       update-knowledge-context-to-working-memory
+                                       ]]
+    [dungeon-master.game.knowledge :refer [find-k-similar-descriptions]]
     [dungeon-master.repositories.world-state :refer [update-db-world-state]]
     [cheshire.core :as json]
     ))
 
 (declare update-world-state)
 (declare call-gpt)
-(declare add-user-input-to-interaction-history)
+
+(defn- store-user-input
+  "add user input into the game state"
+  [game-state user-input]
+  (-> game-state
+      (add-user-input-to-interaction-history user-input)
+      (add-user-input-to-working-memory user-input)))
+
+(defn obtain-context
+  "Given the current state of the game, do we need to query the knowledge base for more context that the DM needs to play their part this turn? If yes, then make that query and stuff it into working memory. Return the new game state including changes to working memory"
+  [game-state]
+
+  ;; IN PROGRESS: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ;; query knowledgebase based on user input
+  ;; add that context into the working memory of game state
+  ;; return new game state
+
+  ;; Currently I need to update the extract entities workflow. I need to
+  ;; include the entire context but instruct the LLM to only extract entities
+  ;; from the last message (user message).
+  ;; This also involves updating the way that the tool/function call is executed
+
+  ;; I think the function could also be improved.
+  ;; the relationship is returned as a string of `personid|AT|placeid`
+  ;; it could be better defined as an explicit tuple like
+  ;; {subject: personid, relationship: 'AT', object: 'placeid'}
+
+
+  ;; ensure that name_id is camel cased name. in fact, don't have the function define name_id, just compute name_id programmatically from name
+  ;; let's move it off of camel cased to pascal case
+
+
+  ;;(let [latest-input (get-in game-state [:working-memory :current-input])
+  ;;      related-nodes (find-k-similar-descriptions latest-input 4)]
+
+  ;;  (println "DEBUG: obtaining context from users input. nodes queried -=================> ")
+  ;;  (println (p/pprint related-nodes))
+
+  ;;  (update-knowledge-context-to-working-memory game-state related-nodes))
+
+  game-state
+  )
 
 (defn run-turn
   "Execute a single game turn given some user input
-   This is where the magic (will) happens"
+   This is where the magic happens"
   [game-state user-input]
   ;;(println "DEBUG: in run-turn, the input is " user-input)
   (-> game-state
-      (add-user-input-to-interaction-history user-input)
+      (store-user-input user-input)
       ;; decide needed context from input
       ;; search for context
+      obtain-context
       ;; formulate prompt
       ;; send prompt to llm
       call-gpt
 
       ;; update game state
-      ;; update world state
       update-world-state)
   )
 
-;;(defn- add-user-input-to-interaction-history
-(defn add-user-input-to-interaction-history ;; making this public while debugging
-  [game-state user-input]
-  (assoc game-state :interaction-history (conj (:interaction-history game-state) {:role "user" :content user-input})))
+  ;;(assoc game-state :interaction-history (conj (:interaction-history game-state) {:role "user" :content user-input})))
+
 
 (defn call-gpt
   [game-state]
@@ -60,20 +104,21 @@
         extract-entities-json (get-result-tool-arguments extracted-entity-response)
         extract-entities-map (json/parse-string extract-entities-json) ]
 
+    ;;(println (p/pprint extracted-entity-response))
+
     (update-db-world-state extract-entities-map)
     game-state))
 
 
 ;; TESTING SECTION
-;;(require '[dungeon-master.game-state :as gs])
+;;(require '[clojure.pprint :as p])
+;;(require '[dungeon-master.game.state :as gs])
 ;;(require '[dungeon-master.llm.gpt :refer [run-completion generate-dm-prompt]])
 ;;(require '[cheshire.core :as json])
 ;;(require '[dungeon-master.repositories.world-state :refer [update-db-world-state]])
 ;;(require '[dungeon-master.llm.gpt :refer [generate-dm-prompt get-result-message get-result-content get-result-tool-calls get-result-tool-arguments run-completion]])
 ;;(require '[ dungeon-master.game.data :refer [extract-entities]])
 ;;(require '[dungeon-master.fixtures.test-world-state :refer :all])
-
-
 
 ;;(test-game-state)
 ;;(run-turn (test-game-state) "I lean back in my chair and take a sip of my mead. Lord Dhelt, you've done yourself a great service coming in here today and meeting me. Please, ease your burdens some and tell me more about these 'delicate matters'.")

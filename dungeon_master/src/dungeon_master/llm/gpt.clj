@@ -7,30 +7,55 @@
 (def default-model "gpt-3.5-turbo")
 (def default-history-length 8)
 
-
 (def extract-entities-prompt
-  "From the given text extract the following Entities & relationships described in the mentioned format
-0. ALWAYS FINISH THE OUTPUT. Never send partial responses
+  "From the given text, please extract the following Entities & relationships described in the mentioned format
 1. First, look for these Entity types in the text and generate as comma-separated format similar to entity type.
-   `id` property of each entity must be alphanumeric and must be unique among the entities. You will be referring this property to define the relationship between entities. Do not create new entity types that aren't mentioned below. You will have to generate as many entities as needed as per the types below:
+2. Only extract entities from the LAST user message. Use the prior messages/conversation as context to understand places/people/characters/objects/names/etc referenced in that last message.
     Entity Types:
-    label:'Person',id:string,name:string,description:string // A person who appears in the text. `id` property is the name of the person, in camel-case; for example, \"michaelClark\", or \"emmaMartinez\". 'name' is the person's name, as spelled in the text if available; for example, \"Michael Clark\" or \"Emma Martinez\". 'description' is a description of the person from the context of the text.
-    label:'Place',id:string,name:string,description:string // A location or place. It could be a building, a business, a city, a neighborhood in a city etc.; 'id' property should be the name of the place, camel-case. if no name is available, make up a placeholder name based on how it is described or referred. Name is the name of the place, if unnamed, then omit this property. Description is a description of the place or location.
-3. Next generate each relationships as triples of head, relationship and tail. To refer the head and tail entity, use their respective `id` property. Relationship property should be mentioned within brackets as comma-separated. They should follow these relationship types below. You will have to generate as many relationships as needed as defined below:
+    label:'Person',name:string,description:string // A person who appears in the text. `id` property is the name of the person, in camel-case; for example, \"michaelClark\", or \"emmaMartinez\". 'name' is the person's name, as spelled in the text if available; for example, \"Michael Clark\" or \"Emma Martinez\". 'description' is a description of the person from the context of the text.
+    label:'Place',name:string,description:string // A location or place. It could be a building, a business, a city, a neighborhood in a city etc.; 'id' property should be the name of the place, camel-case. if no name is available, make up a placeholder name based on how it is described or referred. Name is the name of the place, if unnamed, then omit this property. Description is a description of the place or location.
+3. Next generate each relationships as triples of head, relationship, and tail. To refer the head and tail entity, use their respective `name` property. You will have to generate as many relationships as needed as defined below:
     Relationship types:
-    personid|AT|placeid
-    personid|KNOWS|personid
-    personid|KNOWS|placeid
-    placeid|IN|placeid
+  {from_entity_name: \"Person A\", relationship_type: \"AT\", to_entity_name: \"Place A\"}
+  {from_entity_name: \"Person A\", relationship_type: \"KNOWS\", to_entity_name: \"Person B\"}
+  {from_entity_name: \"Person A\", relationship_type: \"KNOWS\", to_entity_name: \"Place A\"}
+  {from_entity_name: \"Place A\", relationship_type: \"IN\", to_entity_name: \"Place B\"}
 
 The output should look like :
 %%%%%%%%%%BEGIN EXAMPLE OUTPUT%%%%%%%%%%%%%%
 {
-    \"entities\": [{\"label\":\"SlackMessage\",\"id\":string,\"text\":string}],
-    \"relationships\": [\"personid|AT|placeid\"]
+    \"entities\": [
+      {\"label\": \"Person\", \"name\": \"Thorfinn\", \"description\": \"A young warrior on a quest to avenge his father. Wields twin daggers.\"},
+      {\"label\": \"Place\", \"name\": \"Neverwinter\", \"description\": \"A city in the cold northern region.\"}
+    ],
+    \"relationships\": [{\"from_entity_name\": \"Thorfinn\", \"relationship_type\": \"AT\", \"to_entity_name\": \"Neverwinter\"}]
 }
 %%%%%%%%%%END EXAMPLE OUTPUT%%%%%%%%%%%%%%
 Please ensure the output is valid json")
+
+;;(def extract-entities-prompt
+;;  "From the given text extract the following Entities & relationships described in the mentioned format
+;;0. ALWAYS FINISH THE OUTPUT. Never send partial responses
+;;1. First, look for these Entity types in the text and generate as comma-separated format similar to entity type.
+;;   `id` property of each entity must be alphanumeric and must be unique among the entities. You will be referring this property to define the relationship between entities. Do not create new entity types that aren't mentioned below. You will have to generate as many entities as needed as per the types below:
+;;    Entity Types:
+;;    label:'Person',id:string,name:string,description:string // A person who appears in the text. `id` property is the name of the person, in camel-case; for example, \"michaelClark\", or \"emmaMartinez\". 'name' is the person's name, as spelled in the text if available; for example, \"Michael Clark\" or \"Emma Martinez\". 'description' is a description of the person from the context of the text.
+;;    label:'Place',id:string,name:string,description:string // A location or place. It could be a building, a business, a city, a neighborhood in a city etc.; 'id' property should be the name of the place, camel-case. if no name is available, make up a placeholder name based on how it is described or referred. Name is the name of the place, if unnamed, then omit this property. Description is a description of the place or location.
+;;3. Next generate each relationships as triples of head, relationship and tail. To refer the head and tail entity, use their respective `id` property. Relationship property should be mentioned within brackets as comma-separated. They should follow these relationship types below. You will have to generate as many relationships as needed as defined below:
+;;    Relationship types:
+;;    personid|AT|placeid
+;;    personid|KNOWS|personid
+;;    personid|KNOWS|placeid
+;;    placeid|IN|placeid
+;;
+;;The output should look like :
+;;%%%%%%%%%%BEGIN EXAMPLE OUTPUT%%%%%%%%%%%%%%
+;;{
+;;    \"entities\": [{\"label\":\"SlackMessage\",\"id\":string,\"text\":string}],
+;;    \"relationships\": [\"personid|AT|placeid\"]
+;;}
+;;%%%%%%%%%%END EXAMPLE OUTPUT%%%%%%%%%%%%%%
+;;Please ensure the output is valid json")
 
 ;; this is the instruction to gpt which tells it how to create a
 ;; "tool/function" basically this means gpt is guaranteed (maybe?) to return a
@@ -47,16 +72,24 @@ Please ensure the output is valid json")
                                                            :properties {
                                                                         :label {:type "string"
                                                                                 :enum ["Person" "Place"]}
-                                                                        :id {:type "string"
-                                                                             :description "camel cased name of the entity"}
                                                                         :name {:type "string"
                                                                                :description "name of entity as appearing in text" }
                                                                         :description {:type "string"
                                                                                       :description "summary of details about the entity present in the text"}}}}
                                         :relationships {:type "array"
                                                         :description "strings indicating relationships between entities"
-                                                        :items {:type "string"
-                                                                :description "string indicating relationship between entities, of the form from_entity_id|RelationshipType|to_entity_id"}}}}}})
+                                                        :items {:type "object"
+                                                                :properties {
+                                                                             :from_entity_name {:type "string"
+                                                                                                :description "name of the entity that is the subject of the relationship"}
+                                                                             :relationship_type {:type "string"
+                                                                                                 :enum ["AT" "KNOWS" "IN" "HAS"]
+                                                                                                 :description "the nature of the relationship"}
+                                                                             :to_entity_name {:type "string"
+                                                                                              :description "name of the entity that is the object of the relationship"}
+                                                                             }}}}}}})
+                                                        ;;:items {:type "string"
+                                                        ;;        :description "string indicating relationship between entities, of the form entity_name|RelationshipType|entity_name"}}}}}})
 
 (defn generate-system-prompt
   "based on the current game state, generate the necessary prompt to send to the llm
@@ -96,6 +129,8 @@ Please ensure the output is valid json")
 
 (defn run-function-completion
   [messages function-type]
+  ;;(println "DEBUG: run-function-completion called. messages passed in is ========>")
+  ;;(println messages)
   (case function-type
     :extract-entities (api/create-chat-completion {:model default-model
                                                    :messages messages

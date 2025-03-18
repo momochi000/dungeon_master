@@ -1,7 +1,7 @@
 (ns dungeon-master.core
   (:require [dungeon-master.game.data :refer [initialize-strawman-state]]
             [dungeon-master.interface.cli :refer [game-loop]]
-            [dungeon-master.game-state :refer [load-game-state get-last-message]]
+            [dungeon-master.game.state :refer [load-game-state get-last-message]]
             )
   (:gen-class))
 

@@ -1,29 +1,27 @@
 (ns dungeon-master.game.data
   (:require [cheshire.core :as json]
             [dungeon-master.repositories.util :refer [clear-db]]
-            [dungeon-master.game-state :refer [get-last-message]]
+            [dungeon-master.repositories.world-state :refer [update-db-world-state]]
+            [dungeon-master.game.state :refer [get-last-message]]
             [dungeon-master.llm.gpt :refer [run-function-completion extract-entities-prompt]]
             [dungeon-master.fixtures.test-world-state :refer [fixture-json-string
                                                               test-game-state
                                                               insert-test-world-state]]
+            [dungeon-master.game.data.entities :refer [compile-context-for-entity-extraction]]
 
             ))
 
 
-;;(require '[dungeon-master.game-state :refer [get-last-message]])
-;;(require '[ dungeon-master.llm.gpt :refer [run-function-completion extract-entities-prompt]])
 
-;; TODO: This probably shouldn't take the game state but the last message directly
+;; TODO: This probably shouldn't take the game state but all the messages
 (defn extract-entities
   "obtain entities from the last message in the interaction history.
   Sends a request to the llm asking it to identify entities and their
   relationships and returns a json string representing them."
   [game-state]
-  (let [last-message (get-last-message game-state)
-        completion-messages [{:role "system" :content extract-entities-prompt}
-                             {:role "user" :content last-message}]]
-
-    (run-function-completion completion-messages :extract-entities)))
+  (let [context (compile-context-for-entity-extraction game-state)]
+    (run-function-completion context :extract-entities)
+  ))
 
 ;; this is what i can use to start playtesting the game
 (defn initialize-strawman-state
@@ -35,7 +33,13 @@
 
   ;; insert the strawman data into the db
   (println "DEBUG: initialize-strawman-state: inserting strawman data into the db")
-  (insert-test-world-state (json/parse-string fixture-json-string))
+  ;; use this one to skip the embeddings
+  ;;(insert-test-world-state (json/parse-string fixture-json-string))
+  (update-db-world-state (json/parse-string fixture-json-string))
+
   ;; return the dummy game state
   (println "DEBUG: initialize-strawman-state: returning the dummy game state")
   test-game-state)
+
+;;(require '[dungeon-master.game.state :refer [get-last-message]])
+;;(require '[dungeon-master.llm.gpt :refer [run-function-completion extract-entities-prompt]])

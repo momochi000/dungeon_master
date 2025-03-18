@@ -20,7 +20,17 @@
 ;;
 ;; I've left this here for self-documentation, but going forward i'll do it the "right"
 ;; way and declare private functions before the public ones
-(declare create-relationship-from-string)
+(declare create-relationship-from-object)
+
+(defn entity-name-to-node-id
+  "given the entity name, return the node-id it should be transformed into.
+  this removes digits and symbols and pascal cases it"
+  [entity-name]
+  (-> entity-name
+      (clojure.string/replace #"[\'\"\!\@\#\$\%\^\&\*\(\)]" "")
+      (clojure.string/replace #"\d" "")
+      (clojure.string/replace #"\b." #(clojure.string/upper-case %1))
+      (clojure.string/replace #" " "")))
 
 (defn- insert-or-update-entity-node
   "Wrapper function to handle putting entity-data into the database
@@ -30,18 +40,22 @@
   ;;(println "DEBUG: in insert-or-update-entity-node. if statement upcoming")
   ;;(println (p/pprint entity-data))
 
-  (if (get entity-data "description")
-    (let [embedding-response (get-embedding (get entity-data "description"))
+  (let [entity-name (get entity-data "name")
+        node-id (entity-name-to-node-id entity-name)
+        entity-data-with-id (merge entity-data {"id" node-id})]
+
+   (if (get entity-data "description")
+     (let [embedding-response (get-embedding (get entity-data "description"))
           embedding-vector (:embedding embedding-response)
-          entity-data-with-embedding (merge {"vector" embedding-vector} entity-data)]
+          ;;entity-data-with-embedding (merge {"vector" embedding-vector} entity-data)
+          final-entity-data (merge entity-data-with-id {"vector" embedding-vector})]
       ;;(println "DEBUG: inserting vector with embedding entity-data is ===========>")
-      ;;(println (p/pprint entity-data-with-embedding) )
-      (create-node-with-embedding entity-data-with-embedding db-session))
+      ;;(println (p/pprint final-entity-data) )
+      (create-node-with-embedding final-entity-data db-session))
 
-    (create-node entity-data db-session)))
+     (create-node entity-data db-session))))
 
 
-;; TODO: get the database url using some sort of application configuration
 (defn update-db-world-state
   "Given a map of entities and relationships, make appropriate insert or update
   statements into the graph db. Due to the interop with neo4j, the map expects
@@ -59,7 +73,7 @@
 
         (doall (map
                  (fn [relationship-data]
-                   (create-relationship-from-string relationship-data session))
+                   (create-relationship-from-object relationship-data session))
                  relationships))))))
 
 
@@ -89,19 +103,26 @@
         ;;             "description" ("description" node-data)) ]
 ;;    (run-cypher-stmt-with-data cypher-string node-data driver-session)))
 
-(defn- decompose-relationship-string
+(defn- decompose-relationship-object
   "convert string of form
-  node_1_id|RELATIONSHIP_TYPE|node_2_id
-  to a seq of (node-1 relationship-type node-2) each of which are strings"
+  {\"from_entity_name\": \"node1 name\", \"relationship_type\": \"RELATIONSHIP_TYPE\", \"to_entity_name\": \"node2 name\"}
+  to a seq of (node-1_id relationship-type node-2_id) each of which are strings"
   [input]
-  (clojure.string/split input #"\|"))
+
+  (seq
+    [(entity-name-to-node-id (get input "from_entity_name"))
+     (get input "relationship_type")
+     (entity-name-to-node-id (get input "to_entity_name"))]))
 
 
-(defn create-relationship-from-string
+(defn create-relationship-from-object
   "relate two nodes given the input string of the format
+  {\"from_entity_name\": \"node1 name\", \"relationship_type\": \"RELATIONSHIP_TYPE\", \"to_entity_name\": \"node2 name\"}
    node_1_id|RELATIONSHIP_TYPE|node_2_id"
   [input driver-session]
-  (let [[cypher-query cypher-params] (apply create-relationship-statement (decompose-relationship-string input))]
+  (let [[cypher-query cypher-params] (apply create-relationship-statement (decompose-relationship-object input))]
+    (println "DEBUG: create-relasionship-from-object called, cypher query generated is =============> ")
+    (println cypher-query)
     (run-cypher-stmt-with-data-no-return cypher-query cypher-params driver-session)))
 
 
@@ -117,6 +138,9 @@
 ;;(require '[dungeon-master.repositories.util :refer [create-node
 ;;                                                      create-node-with-embedding]])
 
+;;(require '[dungeon-master.repositories.util :refer [create-relationship-statement
+;;                                                    run-cypher-stmt-with-data-no-return
+;;                                                     ]])
 
 ;;(with-open [driver (GraphDatabase/driver database-url (AuthTokens/none))]
 ;;  (with-open [session (.session driver)]

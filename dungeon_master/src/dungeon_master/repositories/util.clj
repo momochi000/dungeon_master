@@ -84,7 +84,7 @@
   as well as whatever `label` is passed in in `node-data`. The optional attributes of a node are `name`
   and `description`. `id` is a required attribute (it becomes `name_id` on the created node"
   [node-data driver-session]
-  (println "DEBUG: in create-node, node-data is ----> " node-data)
+  ;;(println "DEBUG: in create-node, node-data is ----> " node-data)
 
   ;; This is a bit iffy. It's interpolating the label key of node-data into the query.
   ;; I should implement some controls on what can be passed in here as node types
@@ -102,19 +102,17 @@
           "RETURN (p)" )
         ]
 
-    (println "DEBUG: in create-node, sanitized-node-data is ----> " sanitized-node-data)
-    (println "DEBUG: in create-node, the cypher string is ----> " cypher-string)
+    ;;(println "DEBUG: in create-node, sanitized-node-data is ----> " sanitized-node-data)
+    ;;(println "DEBUG: in create-node, the cypher string is ----> " cypher-string)
     (run-cypher-stmt-with-data cypher-string sanitized-node-data driver-session))
-
-  ;;(case (node-data "label")
-  ;;  "Place" (create-place-node node-data driver-session)
-  ;;  "Person" (create-person-node node-data driver-session))
   )
 
+;; TODO: Refactor. Since this function turned out just like create-node, we can deprecate this in favor of that one
+;;   use the cypher code from this one, however.
 (defn create-node-with-embedding
   "see `create-node`. This function accepts and assigns an embedding vector to the node as well"
   [node-data driver-session]
-  (println "DEBUG: in create-node, node-data is ----> " node-data)
+  ;;(println "DEBUG: in create-node, node-data is ----> " node-data)
   (let [sanitized-node-data (merge {"name" nil "description" nil} node-data)
 
         cypher-string
@@ -128,13 +126,18 @@
           "RETURN (p)" )
         ]
 
-    (println "DEBUG: in create-node, sanitized-node-data is ----> " sanitized-node-data)
-    (println "DEBUG: in create-node, the cypher string is ----> " cypher-string)
+    ;;(println "DEBUG: in create-node, sanitized-node-data is ----> " sanitized-node-data)
+    ;;(println "DEBUG: in create-node, the cypher string is ----> " cypher-string)
     (run-cypher-stmt-with-data cypher-string sanitized-node-data driver-session))
   )
 (defn create-relationship-statement
   "relate two nodes with each other"
   [first-node-id relationship-type second-node-id]
+  ;;(println "DEBUG: create-relationship-statement called with input:")
+  ;;(println first-node-id)
+  ;;(println relationship-type)
+  ;;(println second-node-id)
+  ;;(println "DEBUG: create-relationship-statement END -----------------------")
   (let [cypher-stmt (format
                       "MATCH (n1) WHERE n1.name_id = $start_node_id
                       MATCH (n2) WHERE n2.name_id = $end_node_id

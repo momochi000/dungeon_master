@@ -1,7 +1,6 @@
 (ns dungeon-master.interface.cli
   (:require [dungeon-master.game.turn :refer [run-turn]]
-            [dungeon-master.game-state :refer [get-last-message save-game-state load-game-state]]
-            [dungeon-master.game.turn :refer [add-user-input-to-interaction-history]]
+            [dungeon-master.game.state :refer [get-last-message save-game-state load-game-state]]
             ))
 
 
@@ -27,7 +26,6 @@
       (recur
         (let [parsed-command (parse-user-command user-command)]
           (if parsed-command
-            ;; HERE: execute the command
             (exec-user-command parsed-command curr-state)
             (run-turn curr-state user-command))
           )))))

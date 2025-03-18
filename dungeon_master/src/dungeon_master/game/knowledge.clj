@@ -18,3 +18,10 @@
 ;;
 ;;(find-k-similar-descriptions "Cimmeria" 2)
 ;;(find-k-similar-descriptions "goliath barbarian" 2)
+
+;;(require '[clojure.string])
+;;
+;;(clojure.string/replace "foo bar baz" #" " "")
+;;(replace "foo bar baz" #" " "")
+;; looks like there is a `clojure.core.replace already, if import clojure.string, then `replace` becomes ambiguous
+
