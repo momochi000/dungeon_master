@@ -1,6 +1,7 @@
 (ns dungeon-master.interface.cli
   (:require [dungeon-master.game.turn :refer [run-turn]]
             [dungeon-master.game.state :refer [get-last-message save-game-state load-game-state]]
+            [clojure.pprint :as p]
             ))
 
 
@@ -49,6 +50,14 @@
 
 (defn ignore-command [] true)
 
+(defn debug-dump
+  "Pretty print the given argument and return true"
+  [game-state]
+  (println "DEBUG: Dumping game state ==================================>>>")
+  (p/pprint game-state)
+  (println "DEBUG: END =================================================>>>")
+  true)
+
 (defn parse-user-command
   "handle non-game command input. Things like exit game or print debug info
   if the input matches some command, then return a symbol representing the command
@@ -60,7 +69,8 @@
                       [#"^/save (\w+)$" :save-game]
                       [#"^/save" :save-game]
                       [#"^$" :ignore-command]
-                      [#"^/debug" :test-command]]
+                      [#"^/debug" :dump-game-state]
+                      [#"^/test" :test-command]]
 
         matched-command (some
                           (fn [[command-regex action-function]]
@@ -88,6 +98,7 @@
                    (save-game args game-state)
                    (save-game game-state))
       :ignore-command (ignore-command)
+      :dump-game-state (debug-dump game-state)
       :test-command (test-command)
       )
     )
