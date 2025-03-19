@@ -200,6 +200,38 @@ don't get name_id from extract entities, just pascal case the name (and sanitize
 CLOSED: [2025-03-17 Mon 15:32]
 *** DONE update extract_entities function to return a json for relationships
 CLOSED: [2025-03-17 Mon 17:04]
+*** TODO find-knn
+#+begin_src clojure
+;; Attempting to solve why `find-k-similar-descriptions` is returning multiple duplicate results
+(require '[dungeon-master.game.knowledge :refer [find-k-similar-descriptions]] :reload)
+(require '[dungeon-master.repositories.embedding :refer [find-knn find-knn-nodes-query]] :reload)
+(find-k-similar-descriptions "bartender" 2)
+
+
+({:node {:id 9, :name-id "Coran", :description "The stout bartender with a ruddy face who works at the Blushing Mermaid Tavern in Baldur's Gate", :name "Coran"}, :score 0.74105644}
+ {:node {:id 1, :name-id "BlushingMermaidTavern", :description "The tavern in Baldur's Gate known for a warm atmosphere and busy clientele", :name "Blushing Mermaid Tavern"}, :score 0.68543005}
+ {:node {:id 9, :name-id "Coran", :description "The stout bartender with a ruddy face who works at the Blushing Mermaid Tavern in Baldur's Gate", :name "Coran"}, :score 0.74105644}
+ {:node {:id 1, :name-id "BlushingMermaidTavern", :description "The tavern in Baldur's Gate known for a warm atmosphere and busy clientele", :name "Blushing Mermaid Tavern"}, :score 0.68543005}
+ {:node {:id 9, :name-id "Coran", :description "The stout bartender with a ruddy face who works at the Blushing Mermaid Tavern in Baldur's Gate", :name "Coran"}, :score 0.74105644}
+ {:node {:id 1, :name-id "BlushingMermaidTavern", :description "The tavern in Baldur's Gate known for a warm atmosphere and busy clientele", :name "Blushing Mermaid Tavern"}, :score 0.68543005}
+ {:node {:id 9, :name-id "Coran", :description "The stout bartender with a ruddy face who works at the Blushing Mermaid Tavern in Baldur's Gate", :name "Coran"}, :score 0.74105644}
+ {:node {:id 1, :name-id "BlushingMermaidTavern", :description "The tavern in Baldur's Gate known for a warm atmosphere and busy clientele", :name "Blushing Mermaid Tavern"}, :score 0.68543005}
+ {:node {:id 9, :name-id "Coran", :description "The stout bartender with a ruddy face who works at the Blushing Mermaid Tavern in Baldur's Gate", :name "Coran"}, :score 0.74105644}
+ {:node {:id 1, :name-id "BlushingMermaidTavern", :description "The tavern in Baldur's Gate known for a warm atmosphere and busy clientele", :name "Blushing Mermaid Tavern"}, :score 0.68543005})
+
+;; i see that `find-knn-nodes-query` is returning a bunch of duplicate nodes
+;; that executes:
+"MATCH (n:KnowledgeObject) CALL db.index.vector.queryNodes('knowledge-embeddings', $numNodes, $vector) YIELD node AS nodeMatch, score RETURN nodeMatch, score"
+
+#+end_src
+
+ok this is weird. calling `find-knn-nodes-query` and explicitly passing 2 as the
+number of nodes to return i get the repeated/duplicated nodes being returned.
+however, calling the same query (cypher string) in the neo4j console, i get 2
+nodes back as expected This could be a bug in the bolt driver, or some bug
+between clojure and java calling the bolt driver
+
+What i'll need to do is get back the results and trim it to k just to cull the dupes
 *** TODO Update extract entities function call to include entire context
 *** TODO create workflow to query the db based on user input
 *** TODO include relevant knowledge from the graph into the turn prompt
@@ -230,6 +262,7 @@ looks like a reasonable solution
 ** TODO if name_id not present, then don't insert into graph
 don't error out either, just skip it (and log it)
 ** TODO do nothing if user input is empty
+i think i already handled this, just test that it works
 ** TODO update description if existing node is present
 extract-entities pulls out entities
 if there is an entity which is already in the database, it should

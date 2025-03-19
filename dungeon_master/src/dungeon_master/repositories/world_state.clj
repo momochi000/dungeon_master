@@ -121,8 +121,8 @@
    node_1_id|RELATIONSHIP_TYPE|node_2_id"
   [input driver-session]
   (let [[cypher-query cypher-params] (apply create-relationship-statement (decompose-relationship-object input))]
-    (println "DEBUG: create-relasionship-from-object called, cypher query generated is =============> ")
-    (println cypher-query)
+    ;;(println "DEBUG: create-relasionship-from-object called, cypher query generated is =============> ")
+    ;;(println cypher-query)
     (run-cypher-stmt-with-data-no-return cypher-query cypher-params driver-session)))
 
 

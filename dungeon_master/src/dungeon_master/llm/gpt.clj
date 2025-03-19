@@ -33,6 +33,7 @@ The output should look like :
 %%%%%%%%%%END EXAMPLE OUTPUT%%%%%%%%%%%%%%
 Please ensure the output is valid json")
 
+;; NOTE: old definition for reference. This is deprecated and should be removed at some later time
 ;;(def extract-entities-prompt
 ;;  "From the given text extract the following Entities & relationships described in the mentioned format
 ;;0. ALWAYS FINISH THE OUTPUT. Never send partial responses

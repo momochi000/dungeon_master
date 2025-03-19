@@ -7,21 +7,20 @@
             [dungeon-master.fixtures.test-world-state :refer [fixture-json-string
                                                               test-game-state
                                                               insert-test-world-state]]
-            [dungeon-master.game.data.entities :refer [compile-context-for-entity-extraction]]
 
             ))
 
 
 
-;; TODO: This probably shouldn't take the game state but all the messages
+;; TODO: This probably doesn't belong here..
+;; Maybe in llm instead
 (defn extract-entities
   "obtain entities from the last message in the interaction history.
   Sends a request to the llm asking it to identify entities and their
   relationships and returns a json string representing them."
-  [game-state]
-  (let [context (compile-context-for-entity-extraction game-state)]
-    (run-function-completion context :extract-entities)
-  ))
+  [context]
+
+  (run-function-completion context :extract-entities))
 
 ;; this is what i can use to start playtesting the game
 (defn initialize-strawman-state

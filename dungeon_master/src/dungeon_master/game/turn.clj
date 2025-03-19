@@ -5,6 +5,7 @@
                                     get-result-tool-arguments
                                     generate-system-prompt]]
     [dungeon-master.game.data :refer [extract-entities]]
+    [dungeon-master.game.data.entities :refer [compile-context-for-entity-extraction]]
     [dungeon-master.game.prompt :refer [generate-dm-prompts]]
     [dungeon-master.game.state :refer [add-user-input-to-interaction-history
                                        add-user-input-to-working-memory
@@ -12,8 +13,7 @@
                                        ]]
     [dungeon-master.game.knowledge :refer [find-k-similar-descriptions]]
     [dungeon-master.repositories.world-state :refer [update-db-world-state]]
-    [cheshire.core :as json]
-    ))
+    [cheshire.core :as json]))
 
 (declare update-world-state)
 (declare call-gpt)
@@ -34,30 +34,14 @@
   ;; add that context into the working memory of game state
   ;; return new game state
 
-  ;; Currently I need to update the extract entities workflow. I need to
-  ;; include the entire context but instruct the LLM to only extract entities
-  ;; from the last message (user message).
-  ;; This also involves updating the way that the tool/function call is executed
 
-  ;; I think the function could also be improved.
-  ;; the relationship is returned as a string of `personid|AT|placeid`
-  ;; it could be better defined as an explicit tuple like
-  ;; {subject: personid, relationship: 'AT', object: 'placeid'}
+  (let [latest-input (get-in game-state [:working-memory :current-input])
+        related-nodes (find-k-similar-descriptions latest-input 4)]
 
+    ;;(println "DEBUG: obtaining context from users input. nodes queried -=================> ")
+    ;;(println (p/pprint related-nodes))
 
-  ;; ensure that name_id is camel cased name. in fact, don't have the function define name_id, just compute name_id programmatically from name
-  ;; let's move it off of camel cased to pascal case
-
-
-  ;;(let [latest-input (get-in game-state [:working-memory :current-input])
-  ;;      related-nodes (find-k-similar-descriptions latest-input 4)]
-
-  ;;  (println "DEBUG: obtaining context from users input. nodes queried -=================> ")
-  ;;  (println (p/pprint related-nodes))
-
-  ;;  (update-knowledge-context-to-working-memory game-state related-nodes))
-
-  game-state
+    (update-knowledge-context-to-working-memory game-state related-nodes))
   )
 
 (defn run-turn
@@ -100,7 +84,7 @@
   relationships and update the graph db accordingly"
   [game-state]
 
-  (let [extracted-entity-response (extract-entities game-state)
+  (let [extracted-entity-response (extract-entities (compile-context-for-entity-extraction game-state))
         extract-entities-json (get-result-tool-arguments extracted-entity-response)
         extract-entities-map (json/parse-string extract-entities-json) ]
 

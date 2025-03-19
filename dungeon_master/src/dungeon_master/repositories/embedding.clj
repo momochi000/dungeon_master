@@ -61,7 +61,7 @@
       (fn [r]
         {:node (query-result-to-node r)
          :score (-> r (.get "score") .asFloat)})
-      query-results)))
+      (take k query-results))))
 
 
 ;; TESTING SECTION
