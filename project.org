@@ -147,7 +147,8 @@ it's built into clojure
 
 (println (p/pprint some-nested-structure))
 #+end_src
-** TODO figure out how to query the database on each turn
+** DONE figure out how to query the database on each turn
+CLOSED: [2025-04-15 Tue 18:31]
 to provide and generate the context needed for the current turn when calling the
 LLM
 user input -> extract entities -> cypher query?
@@ -233,30 +234,7 @@ nodes back as expected This could be a bug in the bolt driver, or some bug
 between clojure and java calling the bolt driver
 
 What i'll need to do is get back the results and trim it to k just to cull the dupes
-*** TODO Update extract entities function call to include entire context
-*** TODO create workflow to query the db based on user input
-*** TODO include relevant knowledge from the graph into the turn prompt
-*** TODO add this workflow each turn
-*** TODO adjust query to take the latest knowledge
-sort by created at per each node/relation.
-i.e. if Foo AT Bar appears multiple times, take the latest one only.
-** TODO problem: how to invalidate world state?
-or how to handle contradictory information?
-i have a graph which shows an npc both at amn and at baldurs gate
-
-in this case i condsider it a bug. He /was/ at amn, but now is in baldurs gate,
-but the procedure which updates the world state inserted both though he was only
-talking about being at amn previously.
-
-however, it is very conceivable that one could be at some location and then
-later move to another location, at which point they should no longer have the
-=AT= relationship to the other place.
-
-Perhaps an entity should only be allowed a single =AT= relationship? but then
-what if there were rumors about a thing. maybe it's rumored that some artifact
-is here, there, or elsewhere, and it's actual location isn't known...?
-
-This can be solved by simply making the graph append only. We don't care about old or stale information, we'll just sort by created_at/inserted_at and take the newest. This would also have the added benefit of keeping a history of knowledge
+** TODO there's a double print before the user prompt :ui:problem:
 ** TODO create/add logger of some kind
 https://github.com/taoensso/timbre
 looks like a reasonable solution
@@ -281,10 +259,41 @@ See that the LLM returns "you" referring to the player. This is not wrong nor a 
 it should take in the entire conversation history rather than just the last message
 it should also be broken down into smaller functions, one of which simply runs calls the llm
 and another wrapper function which updates the game object
-** TODO there's a double print before the user prompt :ui:problem:
 ** TODO interactions with the game state should be refactored into their own library :refactor:
 all functions which read from and update the game state should go into a module
 whose responsibility is only that.
+** TODO create workflow to query the db based on user input
+deprioritize this until i've playtested a bit more.
+right now the last n messages context should be sufficient to play the game for a reasonable amount of turns
+*** TODO include relevant knowledge from the graph into the turn prompt
+*** TODO add this workflow each turn
+*** TODO adjust query to take the latest knowledge
+sort by created at per each node/relation.
+i.e. if Foo AT Bar appears multiple times, take the latest one only.
+*** TODO handle outdated world state
+I need to be sure to grab only the most recent nodes and relationships when querying
+** DONE problem: how to invalidate world state?
+CLOSED: [2025-04-15 Tue 18:30]
+or how to handle contradictory information?
+i have a graph which shows an npc both at amn and at baldurs gate
+
+in this case i condsider it a bug. He /was/ at amn, but now is in baldurs gate,
+but the procedure which updates the world state inserted both though he was only
+talking about being at amn previously.
+
+however, it is very conceivable that one could be at some location and then
+later move to another location, at which point they should no longer have the
+=AT= relationship to the other place.
+
+Perhaps an entity should only be allowed a single =AT= relationship? but then
+what if there were rumors about a thing. maybe it's rumored that some artifact
+is here, there, or elsewhere, and it's actual location isn't known...?
+
+This can be solved by simply making the graph append only. We don't care about old or stale information, we'll just sort by created_at/inserted_at and take the newest. This would also have the added benefit of keeping a history of knowledge
+** TODO Update extract entities function call to include entire context
+characters and objects present in the latest message may refer to other entities from earlier chat messages.
+
+it does look like i'm passing all the messages. I just need to keep an eye on this task but deprioritize
 ** TODO dump the database to a file
 ** TODO load the database from a file
 ** TODO create a migration which is repeatable
