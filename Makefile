@@ -1,5 +1,5 @@
 DUNGEON_FOLDER=cd dungeon_master;
-.PHONY: build repl
+.PHONY: build repl nrepl run
 
 build:
 	nix-shell --command "$(DUNGEON_FOLDER) clj -T:build jar"

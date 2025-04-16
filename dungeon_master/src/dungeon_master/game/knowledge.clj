@@ -13,6 +13,9 @@
 
 ;; TESTING SECTION
 
+;;(require '[dungeon-master.game.knowledge :refer [find-k-similar-descriptions]])
+;;(find-k-similar-descriptions "lord" 3)
+
 ;;(require '[dungeon-master.llm.embedding :refer [get-embedding]])
 ;;(require '[dungeon-master.repositories.embedding :refer [find-knn]])
 ;;

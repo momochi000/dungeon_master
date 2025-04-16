@@ -200,7 +200,8 @@ don't get name_id from extract entities, just pascal case the name (and sanitize
 CLOSED: [2025-03-17 Mon 15:32]
 *** DONE update extract_entities function to return a json for relationships
 CLOSED: [2025-03-17 Mon 17:04]
-*** TODO find-knn
+*** DONE find-knn
+CLOSED: [2025-04-15 Tue 18:03]
 #+begin_src clojure
 ;; Attempting to solve why `find-k-similar-descriptions` is returning multiple duplicate results
 (require '[dungeon-master.game.knowledge :refer [find-k-similar-descriptions]] :reload)
