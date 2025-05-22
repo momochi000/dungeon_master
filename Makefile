@@ -1,5 +1,5 @@
 DUNGEON_FOLDER=cd dungeon_master;
-.PHONY: build repl nrepl run
+.PHONY: build repl nrepl run services
 
 build:
 	nix-shell --command "$(DUNGEON_FOLDER) clj -T:build jar"
@@ -12,6 +12,9 @@ nrepl:
 
 run:
 	nix-shell --command "$(DUNGEON_FOLDER) clj -X dungeon-master.core/-main"
+
+services:
+	docker-compose up
 
 
 # DEPRECATED

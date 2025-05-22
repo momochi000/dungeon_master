@@ -234,10 +234,15 @@ nodes back as expected This could be a bug in the bolt driver, or some bug
 between clojure and java calling the bolt driver
 
 What i'll need to do is get back the results and trim it to k just to cull the dupes
-** TODO there's a double print before the user prompt :ui:problem:
-** TODO create/add logger of some kind
+** DONE create/add logger of some kind
+CLOSED: [2025-05-22 Thu 14:19]
 https://github.com/taoensso/timbre
 looks like a reasonable solution
+
+actually there's a clojure logger, let's start there and see how that works
+** HOLD there's a double print before the user prompt :ui:problem:
+wierd that this seems to have resolved itself??
+keep an eye out
 ** TODO if name_id not present, then don't insert into graph
 don't error out either, just skip it (and log it)
 ** TODO do nothing if user input is empty

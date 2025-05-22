@@ -13,7 +13,9 @@
                                        ]]
     [dungeon-master.game.knowledge :refer [find-k-similar-descriptions]]
     [dungeon-master.repositories.world-state :refer [update-db-world-state]]
-    [cheshire.core :as json]))
+    [cheshire.core :as json]
+    [clojure.tools.logging :as logging]
+    ))
 
 (declare update-world-state)
 (declare call-gpt)
@@ -38,8 +40,9 @@
   (let [latest-input (get-in game-state [:working-memory :current-input])
         related-nodes (find-k-similar-descriptions latest-input 4)]
 
-    ;;(println "DEBUG: obtaining context from users input. nodes queried -=================> ")
-    ;;(println (p/pprint related-nodes))
+    ;; Both of these log messages are meant  to be examples for logging
+    ;;(logging/log :debug "DEBUG: obtaining context from users input. nodes queried -=================> ")
+    ;;(logging/debug (p/pprint related-nodes))
 
     (update-knowledge-context-to-working-memory game-state related-nodes))
   )
