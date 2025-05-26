@@ -1,5 +1,5 @@
 DUNGEON_FOLDER=cd dungeon_master;
-.PHONY: build repl nrepl run services
+.PHONY: build repl nrepl run alias services
 
 build:
 	nix-shell --command "$(DUNGEON_FOLDER) clj -T:build jar"
@@ -9,6 +9,8 @@ repl:
 
 nrepl:
 	nix-shell --command "$(DUNGEON_FOLDER) clj -M:nREPL -m nrepl.cmdline"
+
+alias: play
 
 run:
 	nix-shell --command "$(DUNGEON_FOLDER) clj -X dungeon-master.core/-main"
