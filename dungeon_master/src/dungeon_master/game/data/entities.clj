@@ -11,6 +11,10 @@
   (let [prompt extract-entities-prompt
         messages (get-messages game-state)]
 
+    ;;(println "DEBUG: checking messages on entity extraction")
+    ;;(println messages)
+    ;;(println "")
+
     (cons
       {:role "system" :content prompt}
       messages)))

@@ -3,7 +3,7 @@
     [dungeon-master.llm.gpt :refer [run-completion
                                     get-result-message
                                     get-result-tool-arguments
-                                    generate-system-prompt]]
+                                    generate-chat-payload]]
     [dungeon-master.game.data :refer [extract-entities]]
     [dungeon-master.game.data.entities :refer [compile-context-for-entity-extraction]]
     [dungeon-master.game.prompt :refer [generate-dm-prompts]]
@@ -14,7 +14,7 @@
     [dungeon-master.game.knowledge :refer [find-k-similar-descriptions]]
     [dungeon-master.repositories.world-state :refer [update-db-world-state]]
     [cheshire.core :as json]
-    [clojure.tools.logging :as logging]
+    ;[clojure.tools.logging :as logging]
     ))
 
 (declare update-world-state)
@@ -67,10 +67,9 @@
 
   ;;(assoc game-state :interaction-history (conj (:interaction-history game-state) {:role "user" :content user-input})))
 
-
 (defn call-gpt
   [game-state]
-  (let [system-prompt (generate-system-prompt
+  (let [system-prompt (generate-chat-payload
                         (:interaction-history game-state)
                         (clojure.string/join ". " (generate-dm-prompts game-state)))
         gpt-result (run-completion system-prompt)

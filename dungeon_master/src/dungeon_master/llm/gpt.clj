@@ -92,14 +92,20 @@ Please ensure the output is valid json")
                                                         ;;:items {:type "string"
                                                         ;;        :description "string indicating relationship between entities, of the form entity_name|RelationshipType|entity_name"}}}}}})
 
-(defn generate-system-prompt
-  "based on the current game state, generate the necessary prompt to send to the llm
-   currently this depends on the current game mode and interaction history. For example, it depends on the player having entered some input, however, in the future, it may develop a different prompt if the user has not entered anything. For example, when starting a new session."
+(defn generate-chat-payload
+  "based on the current game state, generate the necessary messages to send to the llm in the chat api format.
+  It takes a seq of messages and a prompt string
+
+  currently this depends on the current game mode and interaction history. For
+  example, it depends on the player having entered some input, however, in the
+  future, it may develop a different prompt if the user has not entered anything.
+  For example, when starting a new session. "
+
   [chat-history dm-prompt]
 
   (cons
-    {:role "system" :content dm-prompt}
-    (last-n-elements chat-history default-history-length)))
+   {:role "system" :content dm-prompt}
+   (last-n-elements chat-history default-history-length)))
 
 ;; example return value and shape of `run-completion`
 ;;{:id "chatcmpl-8fHPpRYsZ9kEbGQQjAWXKcn85nGK7",

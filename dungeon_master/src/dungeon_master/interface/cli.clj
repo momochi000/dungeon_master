@@ -15,8 +15,7 @@
 
 
   (loop [curr-state initial-state]
-    ;;(println "DEBUG: TURN START: current game state is ")
-    ;;(println curr-state)
+    ;;(println "DEBUG: TURN START: is it this thats triggering twice??")
     (println "Dungeon master ==============================>")
     (println (get-last-message curr-state))
     (println "Your action: ================================>")
