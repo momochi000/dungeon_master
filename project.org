@@ -243,8 +243,33 @@ actually there's a clojure logger, let's start there and see how that works
 ** HOLD there's a double print before the user prompt :ui:problem:
 wierd that this seems to have resolved itself??
 keep an eye out
+
+it seems intermittent
 ** TODO if name_id not present, then don't insert into graph
 don't error out either, just skip it (and log it)
+** TODO Redesign knowledge context that is presented in prompt
+For each turn, we query the db to figure out what additional information the DM needs
+Currently this is a set of nodes from the knowledge graph
+but actually, it would be useful to have the relationship information
+how does this node relate to whatever else is currently in the context?
+
+for example:
+character's A, B, and C are in the scene at location D which is in town E
+What is B's relationship with A? what is C's relationship with A?
+what about A and B's character sheets?
+What does A know about D?
+What is some relevant information from D?
+and so on and so forth.
+
+The relationship itself is also relevant, a "knows about" vs a "hates" vs "loves" means a lot.
+This also means the relationship deserves some metadata beyond the relationship type itself
+It also implies that the relationship will grow and/or change over time. How should this be managed in the db?
+
+interesting problem
+This will need some thoughtful design.
+
+** TODO update ex_aws package
+and ex_aws_s3
 ** TODO do nothing if user input is empty
 i think i already handled this, just test that it works
 ** TODO update description if existing node is present
@@ -267,6 +292,16 @@ and another wrapper function which updates the game object
 ** TODO interactions with the game state should be refactored into their own library :refactor:
 all functions which read from and update the game state should go into a module
 whose responsibility is only that.
+
+the next order/step from this is that all modules that are drilling into game
+state should only consider simple inputs.
+
+in other words, say i have some module that calls the LLM, but it takes in the
+game state
+
+instead it should take in a string. The function that _calls_ this module should
+utilize the other module to extract from the game state, the desired string to
+pass
 ** TODO create workflow to query the db based on user input
 deprioritize this until i've playtested a bit more.
 right now the last n messages context should be sufficient to play the game for a reasonable amount of turns
@@ -488,7 +523,17 @@ Record with the following fields:
     the more i think this through the more it sounds like a state machine...
 + interaction-history
 + player-sheet
-
+** maps
+Considering maps as a graph as well. The map is composed of locations. Each
+location represents exactly that. A town or a building are 2 examples. A
+location can be inside another location.  Player(s) and npcs etc can be in a
+single location at a time. Say you're inside a tavern, the DM mostly really
+cares that you're in the tavern. Where exactly in the tavern can be just fluff
+basically, or if relevant to the situation (combat for example) then those
+specifics matter. Aside from that, mechanically it just matters that you move
+from location to location, thus navigation becomes more simple and context for
+the DM can be constrained to the location (and possibly adjacent locations
+and/or wherever you just came from)
 ** querying for world knowledge
 I'm thinking of a number of ways to do this and it will take some evaluation and
 playtesting to figure out what works best. For now keep track of the different
