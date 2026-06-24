@@ -1,19 +1,19 @@
 version: '3'
 services:
-  dungeon:
-    build:
-      context: .
-    volumes:
-      - ./dungeon_master:/app/
-    environment:
-      - OPENAI_API_KEY=$OPENAI_API_KEY
-    ports:
-      - "61799:61799"
-    tty: true
-    stdin_open: true
-    depends_on:
-      - "graphdb"
-    command: "lein repl :start :host 0.0.0.0 :port 61799"
+  #dungeon:
+  #  build:
+  #    context: .
+  #  volumes:
+  #    - ./dungeon_master:/app/
+  #  environment:
+  #    - OPENAI_API_KEY=$OPENAI_API_KEY
+  #  ports:
+  #    - "61799:61799"
+  #  tty: true
+  #  stdin_open: true
+  #  depends_on:
+  #    - "graphdb"
+  #  command: "lein repl :start :host 0.0.0.0 :port 61799"
 
   graphdb:
     image: docker.io/neo4j
@@ -24,3 +24,13 @@ services:
     ports:
       - "7474:7474"
       - "7687:7687"
+
+  pi:
+    build:
+      context: .
+      dockerfile: ./Containerfile.pi
+    env_file:
+      - .env
+    volumes:
+      - ./:/app/
+      - ./.pi/:/root/.pi/

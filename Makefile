@@ -16,7 +16,10 @@ run:
 	nix-shell --command "$(DUNGEON_FOLDER) clj -X dungeon-master.core/-main"
 
 services:
-	docker-compose up
+	docker compose up
+
+pi:
+	docker compose -f docker-compose.dev.yml run --rm pi pi
 
 
 # DEPRECATED

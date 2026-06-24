@@ -1,0 +1,11 @@
+FROM docker.io/node:25-trixie
+RUN apt update && \
+    apt-get install -y ca-certificates build-essential curl vim fd-find ripgrep && \
+    update-ca-certificates
+
+ENV EDITOR=vim
+
+RUN mkdir /app
+WORKDIR /app
+
+RUN npm install -g @earendil-works/pi-coding-agent@latest
