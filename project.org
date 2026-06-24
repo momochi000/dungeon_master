@@ -245,8 +245,16 @@ wierd that this seems to have resolved itself??
 keep an eye out
 
 it seems intermittent
+** TODO replace neo4j
++ [X] figure out which database to use
+  I think i'm gonna go with ladybug
++ [ ] swap it out
++ [ ] remove neo4j from docker-compose and config
 ** TODO if name_id not present, then don't insert into graph
 don't error out either, just skip it (and log it)
+** TODO figure out logging
+i added the logger but i don't see the log messages
+this might need some additional configuration
 ** TODO Redesign knowledge context that is presented in prompt
 For each turn, we query the db to figure out what additional information the DM needs
 Currently this is a set of nodes from the knowledge graph
@@ -579,3 +587,18 @@ neo4j --> game: response
 note over game: craft prompt
 game -> openai: prompt for current game turn
 #+end_src
+** knowledge management
+Considering some alternatives here
+
+right now I'm doing a step where the LLM extracts all the entities and relationships from a given block of text.
+
+I think part of this is figuring out what each npc "knows" or "has experienced". For this, I could attach a "knows" relationship or a "knowledge" node to an npc, and that knowledge node would be connected to everything that the npc knows or has experienced, which could include whole blocks of text.
+in other words
+
+npc in scene
+player: does thing
+npc sees this
+npc -> knowledge -> "player does thing" content
+dungeon master: replies with "turn" description
+npc -> knowledge -> "player does thing" content
+                 -> "turn" content

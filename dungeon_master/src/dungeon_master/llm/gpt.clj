@@ -5,7 +5,7 @@
             ))
 
 (def default-model "gpt-4.1-mini")
-(def default-history-length 8)
+(def default-history-length 12)
 
 (def extract-entities-prompt
   "From the given text, please extract the following Entities & relationships described in the mentioned format
