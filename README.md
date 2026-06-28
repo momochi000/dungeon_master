@@ -23,18 +23,25 @@ leveraging the `build.clj` file
 ### nrepl
 `clj -M:nREPL -m nrepl.cmdline`
 
-### neo4j database
-This is run from a separate docker container. To make this easier, there is a provided docker-compose file. Simply run `docker-compose up`. It will expose the necessary ports
+### ladybug explorer
+Ladybug is now used as an embedded graph database. The provided docker-compose file starts the Ladybug Explorer web UI and mounts the local database directory so you can inspect the graph in the browser. Run `docker compose up` and open `http://localhost:8000`.
 
 ### Running
 To run the main function (which includes the main game loop), first run
 `docker-compose up`
-which starts the neo4j database
+which starts the Ladybug Explorer UI over the local embedded database file
 
 then run
 `clj -X dungeon-master.core/-main`
 from inside the nix-shell
 There is also a make command for convenience
+
+To seed the bundled test world state from a REPL:
+
+```clojure
+(require '[dungeon-master.fixtures.test-world-state :as fixture])
+(fixture/insert-test-world-state)
+```
 
 ### Old
 
@@ -42,7 +49,7 @@ To do this:
 
     docker-compose up --build
 
-this will also start the neo4j database, which includes a web interface you can reach at `localhost:7474`. By default there is no authentication.
+this will also start Ladybug Explorer, which you can reach at `localhost:8000`.
 
 Unfortunately, i wasn't able to connect to the repl from outside of the docker container, so currently I'm using nix. I start this with `make nix-repl`. This starts a repl at a fixed port, currently 61799. There is an included .nrepl-port file that instructs conjure(vim) to use this port to connect to the clojure repl.
 
@@ -52,4 +59,4 @@ or your method of choice.
 
 ## Running
 
-Run the command line interface with `make play`, but note this expects the database to be running. This simply executes `lein run` inside the container.
+Run the command line interface with `make play`, but note this expects the local Ladybug database path to be configured. When using docker compose, the explorer mounts `./ladybug/data` and opens `dungeon-master.lbug` from there.

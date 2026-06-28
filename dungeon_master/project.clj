@@ -5,7 +5,7 @@
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [
                  [org.clojure/clojure "1.11.1"]
-                 [org.neo4j.driver/neo4j-java-driver "5.15.0"]
+                 [com.ladybugdb/lbug "0.17.1"]
                  [net.clojars.wkok/openai-clojure "0.14.0"]
                  [cheshire "5.12.0"]
                  [environ "1.2.0"] ; environment variable management
@@ -16,9 +16,9 @@
   :target-path "target/%s"
   :plugins [[lein-pprint "1.3.2"] ]
   :profiles {
-             :dev {:env { :database-url "bolt://graphdb:7687"}}
-             :test {:env { :database-url "bolt://graphdb:7687"}}
-             :repl { :env { :database-url "bolt://graphdb:7687"}
+             :dev {:env { :database-path "./ladybug/data/dungeon-master.lbug"}}
+             :test {:env { :database-path "./ladybug/data/dungeon-master.lbug"}}
+             :repl { :env { :database-path "./ladybug/data/dungeon-master.lbug"}
                     :plugins [[lein-pprint "1.3.2"]
                               [io.aviso/pretty "1.4.4"]] }
              :uberjar {:aot :all

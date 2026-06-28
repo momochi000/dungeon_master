@@ -1,7 +1,7 @@
 {:paths ["src"]
 
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
-        org.neo4j.driver/neo4j-java-driver {:mvn/version "5.15.0"}
+        com.ladybugdb/lbug {:mvn/version "0.17.1"}
         net.clojars.wkok/openai-clojure {:mvn/version "0.22.0"}
         cheshire/cheshire {:mvn/version "5.12.0"} ; json
         lynxeyes/dotenv {:mvn/version "1.1.0"} ; .env file support

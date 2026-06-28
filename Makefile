@@ -49,7 +49,5 @@ pi:
 #play:
 #	$(DUNGEON_APP) lein run
 #
-## This can only be run when the database is not running
-#db-backup:
-#	docker compose run --rm graphdb mkdir -p /var/lib/neo4j/data/backups
-#	docker compose run --rm graphdb neo4j-admin database dump --to-path=./data/backups/ neo4j
+## Ladybug uses an embedded database file under ./ladybug/data, so backup can be
+## handled with normal filesystem copy tooling when the app is not writing to it.

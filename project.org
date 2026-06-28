@@ -248,8 +248,9 @@ it seems intermittent
 ** TODO replace neo4j
 + [X] figure out which database to use
   I think i'm gonna go with ladybug
-+ [ ] swap it out
-+ [ ] remove neo4j from docker-compose and config
++ [X] swap it out
++ [X] remove neo4j from docker-compose and config
++ [ ] test and commit
 ** TODO if name_id not present, then don't insert into graph
 don't error out either, just skip it (and log it)
 ** TODO figure out logging

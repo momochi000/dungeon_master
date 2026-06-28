@@ -5,25 +5,24 @@ services:
   #    context: .
   #  volumes:
   #    - ./dungeon_master:/app/
+  #    - ./ladybug/data:/app/ladybug/data
   #  environment:
   #    - OPENAI_API_KEY=$OPENAI_API_KEY
+  #    - DATABASE_PATH=/app/ladybug/data/dungeon-master.lbug
   #  ports:
   #    - "61799:61799"
   #  tty: true
   #  stdin_open: true
-  #  depends_on:
-  #    - "graphdb"
   #  command: "lein repl :start :host 0.0.0.0 :port 61799"
 
   graphdb:
-    image: docker.io/neo4j
+    image: ghcr.io/ladybugdb/explorer:latest
     volumes:
-       - ./neo4j/data:/data
+      - ./ladybug/data:/database
     environment:
-      - NEO4J_AUTH=none
+      - LBUG_FILE=dungeon-master.lbug
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - "8000:8000"
 
   pi:
     build:

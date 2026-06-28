@@ -1,4 +1,8 @@
-# neo4j docker container data volume 
+# embedded ladybug database files
+ladybug/data/*
+!ladybug/data/.gitkeep
+
+# legacy neo4j data directory
 neo4j
 
 # don't pass along any env vars for now

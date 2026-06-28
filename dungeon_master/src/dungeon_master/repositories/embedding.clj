@@ -1,86 +1,73 @@
 (ns dungeon-master.repositories.embedding
-  (:import [org.neo4j.driver GraphDatabase]
-           [org.neo4j.driver AuthTokens]
-           [org.neo4j.driver TransactionWork])
-  (:require [dungeon-master.config :refer [database-url]]
-            [dungeon-master.repositories.util :refer [run-cypher-stmt-with-data run-cypher-read-many-results-with-params]]
-            ))
+  (:require [dungeon-master.repositories.util :refer [with-connection
+                                                      run-cypher-read-many-results-with-params
+                                                      run-cypher-stmt-with-data-no-return]]))
 
+(def ^:private vector-index-statements
+  ["INSTALL VECTOR;"
+   "LOAD VECTOR;"
+   "CALL CREATE_VECTOR_INDEX('KnowledgeObject', 'knowledge_object_embedding_index', 'embedding', metric := 'cosine');"])
+
+(defn- ex-message* [^Throwable e]
+  (or (.getMessage e) (str e)))
+
+(defn- ignorable-vector-error? [message]
+  (boolean (re-find #"(?i)(already exists|already installed|already loaded)" (or message ""))))
+
+(defn- ensure-vector-search-ready!
+  [conn]
+  (doseq [statement vector-index-statements]
+    (try
+      (run-cypher-stmt-with-data-no-return statement {} conn)
+      (catch Exception e
+        (when-not (ignorable-vector-error? (ex-message* e))
+          (throw e))))))
 
 (defn add-embedding
-  "Given a node's name-id and a vector to attach, attach the vector to the node"
+  "Given a node's name-id and a vector to attach, attach the vector to the node."
   [name-id embedding-vector]
-
-    (with-open [driver (GraphDatabase/driver database-url (AuthTokens/none))]
-      (with-open [session (.session driver)]
-        (let [cypher-string "MATCH (n:KnowledgeObject {name_id: $name_id}) CALL db.create.setNodeVectorProperty(n, 'embedding', $vector) RETURN n"]
-
-        (run-cypher-stmt-with-data
-          cypher-string
-          {"name_id" name-id "vector" embedding-vector}
-          session))
-  )))
-
+  (with-connection [conn]
+    (run-cypher-stmt-with-data-no-return
+      (str "MATCH (n:KnowledgeObject) "
+           "WHERE n.name_id = $name_id "
+           "SET n.embedding = $vector")
+      {"name_id" name-id
+       "vector" embedding-vector}
+      conn)))
 
 (defn find-knn-nodes-query
-  "given an embedding vector, return the k most similar nodes (along with their similarity scores)"
+  "Given an embedding vector, return the k most similar nodes (along with their distances)."
   [embedding-vector k]
-
-  (with-open [driver (GraphDatabase/driver database-url (AuthTokens/none))]
-    (with-open [session (.session driver)]
-      (let [cypher-string "MATCH (n:KnowledgeObject) CALL db.index.vector.queryNodes('knowledge-embeddings', $numNodes, $vector) YIELD node AS nodeMatch, score RETURN nodeMatch, score"]
-        (run-cypher-read-many-results-with-params
-          cypher-string
-          {"vector" embedding-vector
-           "numNodes" k}
-          session))
-      )))
+  (with-connection [conn]
+    (ensure-vector-search-ready! conn)
+    (let [query
+          (str "CALL QUERY_VECTOR_INDEX('KnowledgeObject', 'knowledge_object_embedding_index', $vector, $numNodes) "
+               "RETURN node.name_id AS name_id, node.description AS description, "
+               "node.name AS name, node.label AS label, distance")
+          params {"vector" embedding-vector
+                  "numNodes" k}]
+      (->> (run-cypher-read-many-results-with-params query params conn)
+           (sort-by #(double (or (get % "distance") Double/POSITIVE_INFINITY)))
+           (take k)
+           vec))))
 
 (defn- query-result-to-node
   [query-result]
-  (let [node (-> query-result (.get "nodeMatch") .asNode)]
-
-    {:id (.id node)
-     :name-id (-> node (.get "name_id") .asString)
-     :description (-> node (.get "description") .asString) ;(.get node "description")
-     :name (-> node (.get "name") .asString) ;(.get node "name")
-     })
-  )
+  {:name-id (get query-result "name_id")
+   :description (get query-result "description")
+   :name (get query-result "name")
+   :label (get query-result "label")})
 
 (defn find-knn
-  "Find and return the k nearest node-ids to the given embedding vector
+  "Find and return the k nearest nodes to the given embedding vector.
   The resulting structure looks like:
-  ```
-  { :node {:id foo :name-id bar :description ... }
-    :score .994 }
-  ```
-  "
+  {:node {:name-id ... :description ... :name ... :label ...}
+   :score ...
+   :distance ...}"
   [embedding-vector k]
-  (let [query-results (find-knn-nodes-query embedding-vector k)]
-    (map
-      (fn [r]
-        {:node (query-result-to-node r)
-         :score (-> r (.get "score") .asFloat)})
-      (take k query-results))))
-
-
-;; TESTING SECTION
-
-;;(import '[org.neo4j.driver GraphDatabase]
-;;           '[org.neo4j.driver AuthTokens]
-;;           '[org.neo4j.driver TransactionWork])
-;;(require '[dungeon-master.config :refer [database-url]]
-;;            '[dungeon-master.repositories.util :refer [run-cypher-stmt-with-data run-cypher-read-many-results-with-params]]
-;;            )
-;;(def query-output
-;;  (let [e (get-embedding "a test description")
-;;        out (find-knn-nodes-query (:embedding e) 2) ]
-;;    out
-;;    ))
-;;(query-result-to-node (first query-output))
-;;
-;;(def temp
-;;  (let [e (get-embedding "a test description")
-;;        out (find-knn (:embedding e) 2) ]
-;;    out
-;;    ))
+  (map (fn [r]
+         (let [distance (double (or (get r "distance") 1.0))]
+           {:node (query-result-to-node r)
+            :score (- 1.0 distance)
+            :distance distance}))
+       (find-knn-nodes-query embedding-vector k)))

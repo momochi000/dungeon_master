@@ -4,7 +4,7 @@
             [dungeon-master.config :refer [openai-api-key]]
             ))
 
-(def default-model "gpt-4.1-mini")
+(def default-model "gpt-4.1-nano")
 (def default-history-length 12)
 
 (def extract-entities-prompt
