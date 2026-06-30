@@ -21,6 +21,9 @@ services:
 pi:
 	docker compose -f docker-compose.dev.yml run --rm pi pi
 
+pi-shell:
+	docker compose -f docker-compose.dev.yml run --rm pi sh
+
 
 # DEPRECATED
 #   Keeping this around for documentation on how to use leiningen

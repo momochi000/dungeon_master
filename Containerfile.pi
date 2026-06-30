@@ -1,4 +1,4 @@
-FROM docker.io/node:25-trixie
+FROM docker.io/node:26-bookworm
 RUN apt update && \
     apt-get install -y ca-certificates build-essential curl vim fd-find ripgrep && \
     update-ca-certificates
