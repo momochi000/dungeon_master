@@ -203,7 +203,6 @@
     (throw (ex-info (str "Unsupported node label: " label)
                     {:label label
                      :supported-labels supported-node-labels}))))
-  label)
 
 (defn- relationship-type->rel-table [relationship-type]
   (or (get relationship-type->table-name relationship-type)

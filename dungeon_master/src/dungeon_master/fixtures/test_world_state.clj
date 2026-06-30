@@ -1,49 +1,13 @@
 (ns dungeon-master.fixtures.test-world-state
-  (:import [org.neo4j.driver GraphDatabase]
-           [org.neo4j.driver AuthTokens]
-           [org.neo4j.driver Values]
-           [org.neo4j.driver TransactionWork])
   (:require [cheshire.core :as json]
-            [dungeon-master.config :refer [database-url]]
             [dungeon-master.game.state :refer [->GameState]]
             [dungeon-master.game.data.character-sheet :refer [build-blank-char-sheet]]
-            [dungeon-master.repositories.world-state :refer [create-relationship-from-object]]
-            [dungeon-master.repositories.util :refer [create-node]]
-            ))
-
-;; These are the statements we want to run.
-;;-- CREATE CONSTRAINT IF NOT EXISTS FOR (p:Person) REQUIRE (p.name) IS UNIQUE;
-;;CREATE INDEX IF NOT EXISTS FOR (p:Person) ON (p.name);
-;;-- CREATE CONSTRAINT IF NOT EXISTS FOR (p:Place) REQUIRE (p.name) IS UNIQUE;
-;;CREATE INDEX IF NOT EXISTS FOR (p:Place) ON (p.name);
-
-;;CREATE (coran:Person {name:'Coran', description:'The stout bartender with a ruddy face who works at the Blushing Mermaid Tavern in Baldur's Gate'})
-;;CREATE (lordDhelt:Person {name:'Lord Dhelt', description:'A nobleman from Amn who is currently in the Blushing Mermaid Tavern and in need of discreet help'})
-;;CREATE (blushingMermaidTavern:Place {name:'Blushing Mermaid Tavern', description:'The tavern in Baldur's Gate known for a warm atmosphere and busy clientele'})
-;;CREATE (baldursGate:Place {name:'Baldur\'s Gate', description:'The city where the Blushing Mermaid Tavern is located and where business is always good according to Coran'})
-;;CREATE
-;;  (coran)-[:IN]->(blushingMermaidTavern),
-;;  (lordDhelt)-[:IN]->(blushingMermaidTavern),
-;;  (blushingMermaidTavern)-[:IN]->(baldursGate)
-
-
-;;(def fixture-json-string
-;;"{
-;;    \"entities\": [
-;;        {\"label\":\"Person\",\"id\":\"coran\",\"name\":\"Coran\",\"description\":\"The stout bartender with a ruddy face who works at the Blushing Mermaid Tavern in Baldur's Gate\"},
-;;        {\"label\":\"Person\",\"id\":\"lordDhelt\",\"name\":\"Lord Dhelt\",\"description\":\"A nobleman from Amn who is currently in the Blushing Mermaid Tavern and in need of discreet help\"},
-;;        {\"label\":\"Place\",\"id\":\"blushingMermaidTavern\",\"name\":\"Blushing Mermaid Tavern\",\"description\":\"The tavern in Baldur's Gate known for a warm atmosphere and busy clientele\"},
-;;        {\"label\":\"Place\",\"id\":\"baldursGate\",\"name\":\"Baldur's Gate\",\"description\":\"The city where the Blushing Mermaid Tavern is located and where business is always good according to Coran\"}
-;;    ],
-;;    \"relationships\": [
-;;        \"Coran|IN|BlushingMermaidTavern\",
-;;        \"LordDhelt|IN|BlushingMermaidTavern\",
-;;        \"BlushingMermaidTavern|IN|BaldursGate\"
-;;    ]
-;;}")
+            [dungeon-master.repositories.world-state :refer [create-relationship-from-object
+                                                             entity-name-to-node-id]]
+            [dungeon-master.repositories.util :refer [with-connection create-node]]))
 
 (def fixture-json-string
-"{
+  "{
     \"entities\": [
         {\"label\":\"Person\",\"id\":\"coran\",\"name\":\"Coran\",\"description\":\"The stout bartender with a ruddy face who works at the Blushing Mermaid Tavern in Baldur's Gate\"},
         {\"label\":\"Person\",\"id\":\"lordDhelt\",\"name\":\"Lord Dhelt\",\"description\":\"A nobleman from Amn who is currently in the Blushing Mermaid Tavern and in need of discreet help\"},
@@ -56,8 +20,6 @@
         {\"from_entity_name\": \"BlushingMermaidTavern\", \"relationship_type\": \"IN\", \"to_entity_name\": \"BaldursGate\"}
     ]
 }")
-
-;;(require '[dungeon-master.game.state :refer [->GameState]])
 
 (def test-game-state
   (->GameState
@@ -76,115 +38,24 @@
     (build-blank-char-sheet "Torynn")))
 
 (defn insert-test-world-state
-  "insert some fixed data into the graph db"
-  [world-data]
-  ;;(with-open [driver (GraphDatabase/driver "bolt://graphdb:7687" (AuthTokens/none))]
-  (with-open [driver (GraphDatabase/driver database-url (AuthTokens/none))]
-      (with-open [session (.session driver)]
-        (let [entities (world-data "entities")
-              relationships (world-data "relationships") ]
-
-          (doall (map
-                   (fn [entity-data]
-                     (create-node entity-data session))
-                   entities))
-
-          (doall (map
-                   (fn [relationship-data]
-                     (create-relationship-from-object relationship-data session))
-                   relationships))))))
+  "Insert the bundled test world state into the Ladybug database."
+  ([] ;; when given no arguments
+   (insert-test-world-state (json/parse-string fixture-json-string)))
+  ([world-data]
+   (with-connection [conn]
+     (let [entities (world-data "entities")
+           relationships (world-data "relationships")]
+       (doseq [entity-data entities]
+         (create-node (assoc entity-data "id" (entity-name-to-node-id (get entity-data "name"))) conn))
+       (doseq [relationship-data relationships]
+         (create-relationship-from-object relationship-data conn))))))
 
 
-;; TODO: use Values/parameters rather than just clojure maps to pass the args
-  ;; couldn't get this to work. complains of 6 params being passed to Values.parameters
-  ;; other means of calling `parameters` seemed to complain of things relating
-  ;; to clojure data types not matching up with java datatypes
+(defn game-state-fixture
+  "For now this simply returns a simple test game state"
+  []
+  {
 
+   }
+  )
 
-
-;; testing this out
-
-;; Run these in repl or editor to have access to the imports needed in this namespace
-;;(import '(org.neo4j.driver TransactionWork))
-;;(import '(org.neo4j.driver GraphDatabase))
-;;(import '(org.neo4j.driver AuthTokens))
-;;(import '(org.neo4j.driver Values))
-;;(require '[cheshire.core :as json])
-;;(require '[dungeon-master.repositories.world-state :refer [create-node create-relationship-from-object]])
-;;(require '[dungeon-master.game.state :refer [->GameState]])
-;;(require '[dungeon-master.game.data.character-sheet :refer [build-blank-char-sheet]])
-
-;;(insert-test-world-state (json/parse-string fixture-json-string))
-
-
-;;(defn test-create-relationship
-;;  "insert some fixed data into the graph db"
-;;  []
-;;  (with-open [driver (GraphDatabase/driver "bolt://localhost:7687" (AuthTokens/none))]
-;;      (with-open [session (.session driver)]
-;;        (create-relationship-from-object  "coran|IN|blushingMermaidTavern" session))))
-
-;; From within the compose cluster, use graphdb as the hostname of the neo4j instance
-;; but running in my repl, i can access it as localhost
-;;(defn test-session
-;;  "simply providing a session to test individual queries, takes in the function requring the session"
-;;  [query-func data]
-;;  ;;(with-open [driver (GraphDatabase/driver "bolt://graphdb:7687" (AuthTokens/none))]
-;;  (with-open [driver (GraphDatabase/driver "bolt://localhost:7687" (AuthTokens/none))]
-;;    (with-open [session (.session driver)]
-;;      (query-func data session))))
-
-
-;;
-;;
-;;(def sample-person
-;;  {:id "coran" :name "Coran" :description "some test description"})
-;;
-;;(print (sample-person :id))
-;;
-;;(def sample-person
-;;  {"id" "coran" "name" "Coran" "description" "some test description"})
-;;
-;;(print (sample-person "id"))
-;;
-;;
-;;(test-session create-person-node sample-person)
-
-
-;; parse the fixture json into a clojure map
-;; the true here says make the keys into symbols. we might not want this though.
-;; (json/parse-string fixture-json-string true)
-
-
-;;(def people
-;;  '(
-;;    {:name "john" :description "a person"}
-;;    {:name "tony" :description "a person"}
-;;    {:name "amy" :description "a person"}
-;;    ))
-;;
-;;
-;;(defn create-node
-;;  [node-data driver-session]
-;;  (.writeTransaction
-;;    driver-session
-;;    (reify TransactionWork (execute [this tx]
-;;                             (let [result
-;;                                   (.run tx
-;;                                         "MERGE (p:Person {name: $name, description: $description}) RETURN (p)"
-;;                                         node-data)]
-;;                               (.single result)
-;;                               )))))
-;;
-;;(defn test-insert-records
-;;  "insert some fixed data into the graph db"
-;;  []
-;;  (with-open [driver (GraphDatabase/driver "bolt://localhost:7687" (AuthTokens/none))]
-;;    (with-open [session (.session driver)]
-;;      (create-node (first people) session))))
-;;
-;;      ;;(map
-;;      ;;  (fn [entity-data] (create-node entity-data session))
-;;      ;;  people))))
-;;
-;;(test-insert-records)

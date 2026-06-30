@@ -7,8 +7,6 @@
                                                       create-relationship-statement
                                                       run-cypher-stmt-with-data-no-return]]))
 
-(declare create-relationship-from-object)
-
 (defn entity-name-to-node-id
   "Given an entity name, return a normalized node id.
   This removes digits and symbols and PascalCases the result."
@@ -32,6 +30,23 @@
         (create-node-with-embedding final-entity-data conn))
       (create-node entity-data-with-id conn))))
 
+(defn- decompose-relationship-object
+  "Convert
+  {\"from_entity_name\": \"node1 name\", \"relationship_type\": \"RELATIONSHIP_TYPE\", \"to_entity_name\": \"node2 name\"}
+  into [node-1-id relationship-type node-2-id]."
+  [input]
+  [(entity-name-to-node-id (get input "from_entity_name"))
+   (get input "relationship_type")
+   (entity-name-to-node-id (get input "to_entity_name"))])
+
+
+(defn create-relationship-from-object
+  "Relate two nodes given a relationship object."
+  [input conn]
+  (let [[cypher-query cypher-params]
+        (apply create-relationship-statement (decompose-relationship-object input))]
+    (run-cypher-stmt-with-data-no-return cypher-query cypher-params conn)))
+
 (defn update-db-world-state
   "Given a map of entities and relationships, insert or update the world state.
   The map is expected to use string keys."
@@ -44,18 +59,3 @@
       (doseq [relationship-data relationships]
         (create-relationship-from-object relationship-data conn)))))
 
-(defn- decompose-relationship-object
-  "Convert
-  {\"from_entity_name\": \"node1 name\", \"relationship_type\": \"RELATIONSHIP_TYPE\", \"to_entity_name\": \"node2 name\"}
-  into [node-1-id relationship-type node-2-id]."
-  [input]
-  [(entity-name-to-node-id (get input "from_entity_name"))
-   (get input "relationship_type")
-   (entity-name-to-node-id (get input "to_entity_name"))])
-
-(defn create-relationship-from-object
-  "Relate two nodes given a relationship object."
-  [input conn]
-  (let [[cypher-query cypher-params]
-        (apply create-relationship-statement (decompose-relationship-object input))]
-    (run-cypher-stmt-with-data-no-return cypher-query cypher-params conn)))

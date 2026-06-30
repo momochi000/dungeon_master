@@ -7,7 +7,9 @@ This is an experimental project to build an AI powered dungeon master for paper 
 ## Development setup
 The project is heavily under development and at the moment the only thing you can do is set up your development environment, repl, and call some functions.
 
-I'm using clojure's tools.build to build the app, transitioning away from leiningen that I used before. As such, the below instructions are in the process of being deprecated.
+I'm using clojure's tools.build to build the app, transitioning away from
+leiningen that I used before. As such, the below instructions are in the
+process of being deprecated.
 
 
 ### clojure nix environment
@@ -24,14 +26,19 @@ leveraging the `build.clj` file
 `clj -M:nREPL -m nrepl.cmdline`
 
 ### ladybug explorer
-Ladybug is now used as an embedded graph database. The provided docker-compose file starts the Ladybug Explorer web UI and mounts the local database directory so you can inspect the graph in the browser. Run `docker compose up` and open `http://localhost:8000`.
+Ladybug is now used as an embedded graph database. The provided docker-compose
+file starts the Ladybug Explorer web UI and mounts the local database directory
+so you can inspect the graph in the browser. Run `docker compose up` and open
+`http://localhost:8000`.
+
+**Important** There are some problems when there are multiple processes
+interacting with the database. If you run the game and insert some data into
+the db in Clojure while the Explorer UI is open and try to run some queries
+there, they won't show/reflect. You need to keep Explorer closed, run whatever
+in the game, then open explorer and you can query the db that way.
 
 ### Running
-To run the main function (which includes the main game loop), first run
-`docker-compose up`
-which starts the Ladybug Explorer UI over the local embedded database file
-
-then run
+run
 `clj -X dungeon-master.core/-main`
 from inside the nix-shell
 There is also a make command for convenience
@@ -51,7 +58,11 @@ To do this:
 
 this will also start Ladybug Explorer, which you can reach at `localhost:8000`.
 
-Unfortunately, i wasn't able to connect to the repl from outside of the docker container, so currently I'm using nix. I start this with `make nix-repl`. This starts a repl at a fixed port, currently 61799. There is an included .nrepl-port file that instructs conjure(vim) to use this port to connect to the clojure repl.
+Unfortunately, i wasn't able to connect to the repl from outside of the docker
+container, so currently I'm using nix. I start this with `make nix-repl`. This
+starts a repl at a fixed port, currently 61799. There is an included
+.nrepl-port file that instructs conjure(vim) to use this port to connect to the
+clojure repl.
 
 You'll need to provide an OPENAI_API_KEY in the docker environment. Either create a .env file with
 `OPENAI_API_KEY="<your key here>"`

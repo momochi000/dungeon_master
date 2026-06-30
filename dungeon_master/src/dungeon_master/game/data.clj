@@ -6,7 +6,8 @@
             [dungeon-master.llm.gpt :refer [run-function-completion extract-entities-prompt]]
             [dungeon-master.fixtures.test-world-state :refer [fixture-json-string
                                                               test-game-state
-                                                              insert-test-world-state]]
+                                                              insert-test-world-state
+                                                              game-state-fixture]]
 
             ))
 
@@ -23,22 +24,30 @@
   (run-function-completion context :extract-entities))
 
 ;; this is what i can use to start playtesting the game
+;;(defn initialize-strawman-state
+;;  "For now, create an expected version of game state. Just use the fixture we set up in test_world_state"
+;;  []
+;;  ;; clear the database
+;;  (println "DEBUG: initialize-strawman-state: clearing the db")
+;;  (clear-db)
+;;
+;;  ;; insert the strawman data into the db
+;;  (println "DEBUG: initialize-strawman-state: inserting strawman data into the db")
+;;  ;; use this one to skip the embeddings
+;;  ;;(insert-test-world-state (json/parse-string fixture-json-string))
+;;  (update-db-world-state (json/parse-string fixture-json-string))
+;;
+;;  ;; return the dummy game state
+;;  (println "DEBUG: initialize-strawman-state: returning the dummy game state")
+;;  test-game-state)
+
+
 (defn initialize-strawman-state
-  "For now, create an expected version of game state. Just use the fixture we set up in test_world_state"
+  "Create a fixture game state object to use for playtesting and building"
   []
-  ;; clear the database
-  (println "DEBUG: initialize-strawman-state: clearing the db")
-  (clear-db)
 
-  ;; insert the strawman data into the db
-  (println "DEBUG: initialize-strawman-state: inserting strawman data into the db")
-  ;; use this one to skip the embeddings
-  ;;(insert-test-world-state (json/parse-string fixture-json-string))
-  (update-db-world-state (json/parse-string fixture-json-string))
-
-  ;; return the dummy game state
-  (println "DEBUG: initialize-strawman-state: returning the dummy game state")
-  test-game-state)
+  (game-state-fixture)
+  )
 
 ;;(require '[dungeon-master.game.state :refer [get-last-message]])
 ;;(require '[dungeon-master.llm.gpt :refer [run-function-completion extract-entities-prompt]])
